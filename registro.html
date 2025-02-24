@@ -9,7 +9,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
     // Configuración de Firebase
@@ -41,6 +41,9 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        // Actualizar el perfil con el nombre del usuario
+        await updateProfile(user, { displayName: nombre });
+
         // Guardar datos en Firestore
         await addDoc(collection(db, "usuarios"), {
           uid: user.uid,
@@ -51,14 +54,8 @@
         });
 
         alert("Registro exitoso.");
-
-        // Redirigir después de la autenticación
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            window.location.href = "home.html"; // Redirige a home.html solo cuando el usuario esté autenticado
-          }
-        });
-
+        window.location.href = "home.html"; // Redirigir después del registro exitoso
+        
       } catch (error) {
         alert("Error: " + error.message);
       }
@@ -70,8 +67,9 @@
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
 
-        // Guardar datos en Firestore si es nuevo usuario
-        await addDoc(collection(db, "usuarios"), {
+        // Verificar si el usuario ya existe en Firestore
+        const userRef = collection(db, "usuarios");
+        await addDoc(userRef, {
           uid: user.uid,
           nombre: user.displayName,
           email: user.email,
@@ -80,13 +78,7 @@
         });
 
         alert("Inicio de sesión con Google exitoso.");
-
-        // Redirigir después de la autenticación
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            window.location.href = "home.html"; // Redirige a home.html solo cuando el usuario esté autenticado
-          }
-        });
+        window.location.href = "home.html"; // Redirigir después del inicio de sesión con Google
 
       } catch (error) {
         alert("Error: " + error.message);
@@ -109,3 +101,4 @@
   </div>
 </body>
 </html>
+
