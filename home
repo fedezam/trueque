@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Economía Colaborativa</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
+      authDomain: "trueque-28b33.firebaseapp.com",
+      projectId: "trueque-28b33",
+      storageBucket: "trueque-28b33.appspot.com",
+      messagingSenderId: "6430433157",
+      appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
+      measurementId: "G-JMDRX032BS"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+
+    // Verificar estado de autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Mostrar nombre del usuario
+        document.getElementById("username").innerHTML = `Bienvenido, ${user.displayName}`;
+      } else {
+        // Si no hay usuario logueado, redirigir a la página de login
+        window.location.href = "registro.html";
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <!-- Mostrar nombre del usuario -->
+    <div id="username" style="position: fixed; top: 10px; right: 10px;"></div>
+
+    <h1>Bienvenido a Economía Colaborativa</h1>
+    <p>Donde las personas ayudan a otras mediante el trueque de bienes y servicios.</p>
+  </div>
+</body>
+</html>
