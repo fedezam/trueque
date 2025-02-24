@@ -51,6 +51,8 @@
         });
 
         alert("Registro exitoso.");
+        window.location.href = "home.html"; // Redirigir a home después de registro exitoso
+        
       } catch (error) {
         alert("Error: " + error.message);
       }
@@ -72,6 +74,7 @@
         });
 
         alert("Inicio de sesión con Google exitoso.");
+        window.location.href = "home.html"; // Redirigir a home después de login exitoso
       } catch (error) {
         alert("Error: " + error.message);
       }
