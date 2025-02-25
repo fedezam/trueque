@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,12 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro</title>
   <link rel="stylesheet" href="styles.css">
-  
+</head>
+<body>
+  <div class="container">
+    <h2>Registro</h2>
+    <form id="register-form">
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="email" id="email" placeholder="Correo electrónico" required>
+      <input type="password" id="password" placeholder="Contraseña" required>
+      <input type="tel" id="telefono" placeholder="Teléfono">
+      <button type="submit">Registrarse</button>
+    </form>
+    
+    <button id="google-login">Registrarse con Google</button>
+  </div>
+
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
     // Configuración de Firebase
     const firebaseConfig = {
@@ -29,76 +44,78 @@
     const db = getFirestore();
     const googleProvider = new GoogleAuthProvider();
 
-    // Función para registrar usuario con email y password
-    document.getElementById("register-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nombre = document.getElementById("nombre").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const telefono = document.getElementById("telefono").value;
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Actualizar el perfil con el nombre del usuario
-        await updateProfile(user, { displayName: nombre });
-
-        // Guardar datos en Firestore
-        await addDoc(collection(db, "usuarios"), {
-          uid: user.uid,
-          nombre,
-          email,
-          telefono,
-          numeroUsuario: Math.floor(1000 + Math.random() * 9000) // Número aleatorio de usuario
-        });
-
-        alert("Registro exitoso.");
-        window.location.href = "home.html"; // Redirigir después del registro exitoso
-        
-      } catch (error) {
-        alert("Error: " + error.message);
+    // Redirigir si el usuario ya está autenticado
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "home.html";
       }
     });
 
-    // Función para registrarse con Google
-    document.getElementById("google-login").addEventListener("click", async () => {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
+    // Esperar a que el DOM esté cargado
+    document.addEventListener("DOMContentLoaded", () => {
+      const registerForm = document.getElementById("register-form");
+      const googleLogin = document.getElementById("google-login");
 
-        // Verificar si el usuario ya existe en Firestore
-        const userRef = collection(db, "usuarios");
-        await addDoc(userRef, {
-          uid: user.uid,
-          nombre: user.displayName,
-          email: user.email,
-          telefono: user.phoneNumber || "",
-          numeroUsuario: Math.floor(1000 + Math.random() * 9000)
+      if (registerForm) {
+        registerForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const nombre = document.getElementById("nombre").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const telefono = document.getElementById("telefono").value;
+
+          try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await updateProfile(user, { displayName: nombre });
+
+            // Guardar datos en Firestore
+            await addDoc(collection(db, "usuarios"), {
+              uid: user.uid,
+              nombre,
+              email,
+              telefono,
+              numeroUsuario: Math.floor(1000 + Math.random() * 9000)
+            });
+
+            alert("Registro exitoso.");
+            window.location.href = "home.html";
+          } catch (error) {
+            alert("Error: " + error.message);
+          }
         });
+      }
 
-        alert("Inicio de sesión con Google exitoso.");
-        window.location.href = "home.html"; // Redirigir después del inicio de sesión con Google
+      if (googleLogin) {
+        googleLogin.addEventListener("click", async () => {
+          try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
 
-      } catch (error) {
-        alert("Error: " + error.message);
+            // Verificar si el usuario ya está en Firestore
+            const userRef = collection(db, "usuarios");
+            const q = query(userRef, where("uid", "==", user.uid));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+              await addDoc(userRef, {
+                uid: user.uid,
+                nombre: user.displayName,
+                email: user.email,
+                telefono: user.phoneNumber || "",
+                numeroUsuario: Math.floor(1000 + Math.random() * 9000)
+              });
+            }
+
+            alert("Inicio de sesión con Google exitoso.");
+            window.location.href = "home.html";
+          } catch (error) {
+            alert("Error: " + error.message);
+          }
+        });
       }
     });
   </script>
-</head>
-<body>
-  <div class="container">
-    <h2>Registro</h2>
-    <form id="register-form">
-      <input type="text" id="nombre" placeholder="Nombre" required>
-      <input type="email" id="email" placeholder="Correo electrónico" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
-      <input type="tel" id="telefono" placeholder="Teléfono">
-      <button type="submit">Registrarse</button>
-    </form>
-    
-    <button id="google-login">Registrarse con Google</button>
-  </div>
 </body>
 </html>
-
