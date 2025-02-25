@@ -103,24 +103,37 @@
       }
     });
 
-    // Guardar dirección de wallet en Firebase
-    saveWalletBtn.addEventListener("click", async () => {
-      const user = auth.currentUser;
-      if (user && walletInput.value) {
-        await updateDoc(doc(db, "usuarios", user.uid), {
-          wallet: walletInput.value
-        });
-        alert("Wallet guardada correctamente.");
-        continueBtn.style.display = "block";
-      } else {
-        alert("Ingresa una dirección de wallet válida.");
-      }
-    });
+  saveWalletBtn.addEventListener("click", async () => {
+  console.log("Botón de guardar wallet clickeado");
 
-    // Ir a la página de tareas
-    continueBtn.addEventListener("click", () => {
-      window.location.href = "https://fedezam.github.io/trueque/task.html";
+  const user = auth.currentUser;
+  const walletAddress = walletInput.value.trim(); // Eliminar espacios en blanco
+
+  console.log("Usuario autenticado:", user ? user.uid : "No hay usuario");
+  console.log("Wallet ingresada:", walletAddress);
+
+  if (!user) {
+    alert("Debes iniciar sesión antes de guardar tu wallet.");
+    return;
+  }
+
+  if (!walletAddress) {
+    alert("Ingresa una dirección de wallet válida.");
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, "usuarios", user.uid), {
+      wallet: walletAddress,
     });
+    alert("Wallet guardada correctamente.");
+    continueBtn.style.display = "block";
+  } catch (error) {
+    console.error("Error al guardar la wallet:", error);
+    alert("Hubo un problema al guardar la wallet.");
+  }
+});
+
   </script>
 </body>
 </html>
