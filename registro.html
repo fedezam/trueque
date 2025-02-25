@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,6 +18,12 @@
     </form>
     
     <button id="google-login">Registrarse con Google</button>
+
+    <!-- Mensaje de bienvenida y botón de continuar -->
+    <div id="welcome-container" style="display: none; margin-top: 20px;">
+      <h3 id="welcome-message"></h3>
+      <button id="continue-button" style="display: none;">Continuar</button>
+    </div>
   </div>
 
   <!-- Firebase SDK -->
@@ -44,11 +49,28 @@
     const db = getFirestore();
     const googleProvider = new GoogleAuthProvider();
 
-    // Redirigir si el usuario ya está autenticado
+    // Elementos del DOM
+    const welcomeContainer = document.getElementById("welcome-container");
+    const welcomeMessage = document.getElementById("welcome-message");
+    const continueButton = document.getElementById("continue-button");
+
+    // Verificar si el usuario ya está autenticado
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        window.location.href = "home.html";
+        console.log("Usuario detectado:", user);
+        welcomeMessage.textContent = `Bienvenido, ${user.displayName || "Usuario"} 👋`;
+        welcomeContainer.style.display = "block";
+        continueButton.style.display = "inline-block";
+      } else {
+        console.log("No hay usuario autenticado.");
+        welcomeContainer.style.display = "none";
+        continueButton.style.display = "none";
       }
+    });
+
+    // Botón para continuar
+    continueButton.addEventListener("click", () => {
+      window.location.href = "https://fedezam.github.io/trueque/home.html";
     });
 
     // Esperar a que el DOM esté cargado
@@ -70,7 +92,6 @@
 
             await updateProfile(user, { displayName: nombre });
 
-            // Guardar datos en Firestore
             await addDoc(collection(db, "usuarios"), {
               uid: user.uid,
               nombre,
@@ -80,7 +101,7 @@
             });
 
             alert("Registro exitoso.");
-            window.location.href = "home.html";
+            location.reload(); // Recargar para mostrar el mensaje de bienvenida
           } catch (error) {
             alert("Error: " + error.message);
           }
@@ -109,8 +130,9 @@
             }
 
             alert("Inicio de sesión con Google exitoso.");
-            window.location.href = "home.html";
+            location.reload(); // Recargar para mostrar el mensaje de bienvenida
           } catch (error) {
+            console.error("Error en el inicio de sesión:", error);
             alert("Error: " + error.message);
           }
         });
