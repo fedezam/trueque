@@ -8,15 +8,22 @@
 </head>
 <body>
   <div class="container">
-    <h2>Configura tu billetera</h2>
+    <!-- Mensaje y botón para usuarios no autenticados -->
+    <div id="not-logged-in" style="display: none;">
+      <h2>Necesitas iniciar sesión</h2>
+      <p>Para continuar, por favor inicia sesión o regístrate.</p>
+      <button id="go-to-register">Ir a registro</button>
+    </div>
 
-    <button id="download-metamask">Descargar MetaMask</button>
-    <button id="add-polygon-network" disabled>Agregar Red AMOI</button>
-
-    <input type="text" id="wallet-address" placeholder="Pega tu dirección de wallet" disabled>
-    <button id="save-wallet" disabled>Guardar Wallet</button>
-
-    <button id="continue-tasks" style="display: none;">Continuar a tareas</button>
+    <!-- Contenido para usuarios autenticados -->
+    <div id="logged-in-content" style="display: none;">
+      <h2>Configura tu billetera</h2>
+      <button id="download-metamask">Descargar MetaMask</button>
+      <button id="add-polygon-network" disabled>Agregar Red AMOI</button>
+      <input type="text" id="wallet-address" placeholder="Pega tu dirección de wallet" disabled>
+      <button id="save-wallet" disabled>Guardar Wallet</button>
+      <button id="continue-tasks" style="display: none;">Continuar a tareas</button>
+    </div>
   </div>
 
   <!-- Firebase & Web3 Scripts -->
@@ -38,6 +45,10 @@
     const auth = getAuth();
     const db = getFirestore();
 
+    const notLoggedInDiv = document.getElementById("not-logged-in");
+    const loggedInContentDiv = document.getElementById("logged-in-content");
+    const goToRegisterBtn = document.getElementById("go-to-register");
+
     const metamaskBtn = document.getElementById("download-metamask");
     const addNetworkBtn = document.getElementById("add-polygon-network");
     const walletInput = document.getElementById("wallet-address");
@@ -47,13 +58,23 @@
     // Verificar usuario autenticado
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        console.log("🔴 No hay usuario autenticado. Redirigiendo a registro...");
-        window.location.replace("https://fedezam.github.io/trueque/registro.html");
+        console.log("🔴 No hay usuario autenticado.");
+        // Mostrar mensaje y botón de registro
+        notLoggedInDiv.style.display = "block";
+        loggedInContentDiv.style.display = "none";
       } else {
-        console.log("✅ Usuario autenticado.");
+        console.log("✅ Usuario autenticado:", user);
+        // Mostrar contenido para usuarios autenticados
+        notLoggedInDiv.style.display = "none";
+        loggedInContentDiv.style.display = "block";
         addNetworkBtn.disabled = false;
         walletInput.disabled = false;
       }
+    });
+
+    // Redirigir a registro manualmente
+    goToRegisterBtn.addEventListener("click", () => {
+      window.location.href = "https://fedezam.github.io/trueque/registro.html";
     });
 
     // Descargar MetaMask
@@ -99,9 +120,6 @@
     continueBtn.addEventListener("click", () => {
       window.location.href = "https://fedezam.github.io/trueque/task.html";
     });
-
   </script>
 </body>
 </html>
-
-
