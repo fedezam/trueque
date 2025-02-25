@@ -3,28 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro</title>
+  <title>Configurar Wallet</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h2>Registro</h2>
-    <form id="register-form">
-      <input type="text" id="nombre" placeholder="Nombre" required>
-      <input type="email" id="email" placeholder="Correo electrónico" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
-      <input type="tel" id="telefono" placeholder="Teléfono">
-      <button type="submit">Registrarse</button>
-    </form>
-    
-    <button id="google-login">Registrarse con Google</button>
+    <h2>Configura tu billetera</h2>
+
+    <button id="download-metamask">Descargar MetaMask</button>
+    <button id="add-polygon-network" disabled>Agregar Red AMOI</button>
+
+    <input type="text" id="wallet-address" placeholder="Pega tu dirección de wallet" disabled>
+    <button id="save-wallet" disabled>Guardar Wallet</button>
+
+    <button id="continue-tasks" style="display: none;">Continuar a tareas</button>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase & Web3 Scripts -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "TU_API_KEY",
@@ -38,54 +37,69 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const db = getFirestore();
-    const googleProvider = new GoogleAuthProvider();
 
-    // Redirigir a home si el usuario ya está autenticado
+    const metamaskBtn = document.getElementById("download-metamask");
+    const addNetworkBtn = document.getElementById("add-polygon-network");
+    const walletInput = document.getElementById("wallet-address");
+    const saveWalletBtn = document.getElementById("save-wallet");
+    const continueBtn = document.getElementById("continue-tasks");
+
+    // Verificar usuario autenticado
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("✅ Usuario autenticado. Redirigiendo a home...");
-        window.location.replace("https://fedezam.github.io/trueque/home.html");
+      if (!user) {
+        console.log("🔴 No hay usuario autenticado. Redirigiendo a registro...");
+        window.location.replace("https://fedezam.github.io/trueque/registro.html");
       } else {
-        console.log("🔴 Usuario NO autenticado. Se queda en registro.");
+        console.log("✅ Usuario autenticado.");
+        addNetworkBtn.disabled = false;
+        walletInput.disabled = false;
       }
     });
 
-    document.getElementById("register-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nombre = document.getElementById("nombre").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const telefono = document.getElementById("telefono").value;
+    // Descargar MetaMask
+    metamaskBtn.addEventListener("click", () => {
+      window.open("https://metamask.io/download/", "_blank");
+    });
 
+    // Agregar la red AMOI a MetaMask
+    addNetworkBtn.addEventListener("click", async () => {
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        await updateProfile(user, { displayName: nombre });
-
-        await addDoc(collection(db, "usuarios"), {
-          uid: user.uid,
-          nombre,
-          email,
-          telefono
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: "0x13882",
+            chainName: "Polygon AMOI Testnet",
+            nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+            rpcUrls: ["https://rpc-amoy.polygon.technology"],
+            blockExplorerUrls: ["https://amoy.polygonscan.com"]
+          }]
         });
-
-        alert("Registro exitoso.");
-        window.location.replace("https://fedezam.github.io/trueque/home.html");
+        alert("Red AMOI agregada con éxito.");
+        saveWalletBtn.disabled = false;
       } catch (error) {
-        alert("Error: " + error.message);
+        alert("Error al agregar la red: " + error.message);
       }
     });
 
-    document.getElementById("google-login").addEventListener("click", async () => {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        alert("Inicio de sesión con Google exitoso.");
-        window.location.replace("https://fedezam.github.io/trueque/home.html");
-      } catch (error) {
-        alert("Error: " + error.message);
+    // Guardar dirección de wallet en Firebase
+    saveWalletBtn.addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (user && walletInput.value) {
+        await updateDoc(doc(db, "usuarios", user.uid), {
+          wallet: walletInput.value
+        });
+        alert("Wallet guardada correctamente.");
+        continueBtn.style.display = "block";
+      } else {
+        alert("Ingresa una dirección de wallet válida.");
       }
     });
+
+    // Ir a la página de tareas
+    continueBtn.addEventListener("click", () => {
+      window.location.href = "https://fedezam.github.io/trueque/task.html";
+    });
+
   </script>
 </body>
 </html>
