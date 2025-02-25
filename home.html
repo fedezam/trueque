@@ -3,46 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Economía Colaborativa</title>
+  <title>Configurar Wallet</title>
   <link rel="stylesheet" href="styles.css">
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
-      authDomain: "trueque-28b33.firebaseapp.com",
-      projectId: "trueque-28b33",
-      storageBucket: "trueque-28b33.appspot.com",
-      messagingSenderId: "6430433157",
-      appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
-      measurementId: "G-JMDRX032BS"
-    };
-
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-
-    // Verificar estado de autenticación
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Mostrar nombre del usuario
-        document.getElementById("username").innerHTML = `Bienvenido, ${user.displayName}`;
-      } else {
-        // Si no hay usuario logueado, redirigir a la página de login
-        window.location.href = "registro.html";
-      }
-    });
-  </script>
 </head>
 <body>
   <div class="container">
-    <!-- Mostrar nombre del usuario -->
-    <div id="username" style="position: fixed; top: 10px; right: 10px;"></div>
+    <h2>Configura tu billetera</h2>
 
-    <h1>Bienvenido a Economía Colaborativa</h1>
-    <p>Donde las personas ayudan a otras mediante el trueque de bienes y servicios.</p>
+    <button id="download-metamask">Descargar MetaMask</button>
+    <button id="add-polygon-network" disabled>Agregar Red AMOI</button>
+
+    <input type="text" id="wallet-address" placeholder="Pega tu dirección de wallet" disabled>
+    <button id="save-wallet" disabled>Guardar Wallet</button>
+
+    <button id="continue-tasks" style="display: none;">Continuar a tareas</button>
   </div>
+
+  <!-- Firebase & Web3 Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const metamaskBtn = document.getElementById("download-metamask");
+    const addNetworkBtn = document.getElementById("add-polygon-network");
+    const walletInput = document.getElementById("wallet-address");
+    const saveWalletBtn = document.getElementById("save-wallet");
+    const continueBtn = document.getElementById("continue-tasks");
+
+    // Detectar usuario autenticado
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Usuario autenticado:", user.displayName);
+        addNetworkBtn.disabled = false;
+        walletInput.disabled = false;
+      } else {
+        console.log("No hay usuario autenticado.");
+        window.location.href = "registro.html";
+      }
+    });
+
+    // Descargar MetaMask
+    metamaskBtn.addEventListener("click", () => {
+      window.open("https://metamask.io/download/", "_blank");
+    });
+
+    // Agregar la red AMOI a MetaMask
+    addNetworkBtn.addEventListener("click", async () => {
+      try {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: "0x13882", // ID de la red AMOI
+            chainName: "Polygon AMOI Testnet",
+            nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+            rpcUrls: ["https://rpc-amoy.polygon.technology"],
+            blockExplorerUrls: ["https://amoy.polygonscan.com"]
+          }]
+        });
+        alert("Red AMOI agregada con éxito.");
+        saveWalletBtn.disabled = false;
+      } catch (error) {
+        alert("Error al agregar la red: " + error.message);
+      }
+    });
+
+    // Guardar dirección de wallet en Firebase
+    saveWalletBtn.addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (user && walletInput.value) {
+        await updateDoc(doc(db, "usuarios", user.uid), {
+          wallet: walletInput.value
+        });
+        alert("Wallet guardada correctamente.");
+        continueBtn.style.display = "block";
+      } else {
+        alert("Ingresa una dirección de wallet válida.");
+      }
+    });
+
+    // Ir a la página de tareas
+    continueBtn.addEventListener("click", () => {
+      window.location.href = "task.html";
+    });
+
+  </script>
 </body>
 </html>
