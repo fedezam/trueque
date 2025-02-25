@@ -18,12 +18,6 @@
     </form>
     
     <button id="google-login">Registrarse con Google</button>
-
-    <!-- Mensaje de bienvenida y botón de continuar -->
-    <div id="welcome-container" style="display: none; margin-top: 20px;">
-      <h3 id="welcome-message"></h3>
-      <button id="continue-button" style="display: none;">Continuar</button>
-    </div>
   </div>
 
   <!-- Firebase SDK -->
@@ -49,28 +43,12 @@
     const db = getFirestore();
     const googleProvider = new GoogleAuthProvider();
 
-    // Elementos del DOM
-    const welcomeContainer = document.getElementById("welcome-container");
-    const welcomeMessage = document.getElementById("welcome-message");
-    const continueButton = document.getElementById("continue-button");
-
-    // Verificar si el usuario ya está autenticado
+    // Redirigir si el usuario ya está autenticado
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("Usuario detectado:", user);
-        welcomeMessage.textContent = `Bienvenido, ${user.displayName || "Usuario"} 👋`;
-        welcomeContainer.style.display = "block";
-        continueButton.style.display = "inline-block";
-      } else {
-        console.log("No hay usuario autenticado.");
-        welcomeContainer.style.display = "none";
-        continueButton.style.display = "none";
+        console.log("Usuario autenticado. Redirigiendo...");
+        window.location.href = "https://fedezam.github.io/trueque/home.html";
       }
-    });
-
-    // Botón para continuar
-    continueButton.addEventListener("click", () => {
-      window.location.href = "https://fedezam.github.io/trueque/home.html";
     });
 
     // Esperar a que el DOM esté cargado
@@ -101,7 +79,7 @@
             });
 
             alert("Registro exitoso.");
-            location.reload(); // Recargar para mostrar el mensaje de bienvenida
+            window.location.href = "https://fedezam.github.io/trueque/home.html"; // Redirigir después del registro
           } catch (error) {
             alert("Error: " + error.message);
           }
@@ -130,7 +108,7 @@
             }
 
             alert("Inicio de sesión con Google exitoso.");
-            location.reload(); // Recargar para mostrar el mensaje de bienvenida
+            window.location.href = "https://fedezam.github.io/trueque/home.html"; // Redirigir después del inicio de sesión
           } catch (error) {
             console.error("Error en el inicio de sesión:", error);
             alert("Error: " + error.message);
