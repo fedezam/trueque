@@ -79,8 +79,8 @@ document.getElementById("google-login").addEventListener("click", loginWithGoogl
 
 //home.html
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
@@ -96,65 +96,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
-// Verifica si el usuario está autenticado
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.replace("registro.html");
   } else {
-    document.getElementById("welcome-message").textContent = `Bienvenido ${user.displayName}`;
-    
-    // Obtener la cantidad de TqC (futura implementación)
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+    let userName = user.displayName || "Usuario";
+    let tqc = 0;
+
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      document.getElementById("tqc-balance").textContent = `Tienes (${userData.tqc || 0}) TqC`;
+      userName = userData.nombre || userName;
+      tqc = userData.tqc || 0;
     }
-  }
-});
 
-// Botón para descargar MetaMask
-document.getElementById("download-metamask").addEventListener("click", () => {
-  window.open("https://metamask.io/download/", "_blank");
-});
-
-// Botón para agregar la red AMOI de Polygon
-document.getElementById("add-polygon-network").addEventListener("click", async () => {
-  try {
-    await window.ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [{
-        chainId: "0x13882", // ID de la red AMOI
-        chainName: "Polygon AMOI",
-        nativeCurrency: {
-          name: "MATIC",
-          symbol: "MATIC",
-          decimals: 18
-        },
-        rpcUrls: ["https://rpc-amoi.polygon.io"],
-        blockExplorerUrls: ["https://amoi-explorer.polygon.io"]
-      }]
-    });
-    alert("Red AMOI añadida con éxito.");
-  } catch (error) {
-    alert("Error al agregar la red: " + error.message);
-  }
-});
-
-// Guardar dirección de wallet
-document.getElementById("save-wallet").addEventListener("click", async () => {
-  const user = auth.currentUser;
-  const walletAddress = document.getElementById("wallet-address").value.trim();
-
-  if (!walletAddress) {
-    alert("Por favor, ingresa una dirección de wallet.");
-    return;
-  }
-
-  try {
-    await setDoc(doc(db, "usuarios", user.uid), { wallet: walletAddress }, { merge: true });
-    alert("BILLETERA VINCULADA CON ÉXITO! DISFRUTA DE NUESTROS ANUNCIANTES");
-    window.location.replace("task.html");
-  } catch (error) {
-    alert("Error al guardar la wallet: " + error.message);
+    document.getElementById("welcome-message").textContent = `Bienvenido ${userName}`;
+    document.getElementById("tqc-balance").textContent = `Tienes (${tqc}) TqC`;
   }
 });
