@@ -8,132 +8,15 @@
 </head>
 <body>
   <div class="container">
-    <!-- Mensaje y botón para usuarios no autenticados -->
-    <div id="not-logged-in" style="display: none;">
-      <h2>Necesitas iniciar sesión</h2>
-      <p>Para continuar, por favor inicia sesión o regístrate.</p>
-      <button id="go-to-register">Ir a registro</button>
-    </div>
-
-    <!-- Contenido para usuarios autenticados -->
-    <div id="logged-in-content" style="display: none;">
-      <h2>Configura tu billetera</h2>
-      <button id="download-metamask">Descargar MetaMask</button>
-      <button id="add-polygon-network" disabled>Agregar Red AMOI</button>
-      <input type="text" id="wallet-address" placeholder="Pega tu dirección de wallet" disabled>
-      <button id="save-wallet" disabled>Guardar Wallet</button>
-      <button id="continue-tasks" style="display: none;">Continuar a tareas</button>
-    </div>
+    <h2>Configura tu billetera</h2>
+    <button id="download-metamask">Descargar MetaMask</button>
+    <button id="add-polygon-network">Agregar Red AMOI</button>
+    <input type="text" id="wallet-address" placeholder="Pega tu dirección de wallet">
+    <button id="save-wallet">Guardar Wallet</button>
+    <button id="continue-tasks" style="display: none;">Continuar a tareas</button>
   </div>
 
-  <!-- Firebase & Web3 Scripts -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-    import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-     apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
-     authDomain: "trueque-28b33.firebaseapp.com",
-     projectId: "trueque-28b33",
-     storageBucket: "trueque-28b33.firebasestorage.app",
-     messagingSenderId: "6430433157",
-     appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
-     measurementId: "G-JMDRX032BS"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getFirestore();
-
-    const notLoggedInDiv = document.getElementById("not-logged-in");
-    const loggedInContentDiv = document.getElementById("logged-in-content");
-    const goToRegisterBtn = document.getElementById("go-to-register");
-
-    const metamaskBtn = document.getElementById("download-metamask");
-    const addNetworkBtn = document.getElementById("add-polygon-network");
-    const walletInput = document.getElementById("wallet-address");
-    const saveWalletBtn = document.getElementById("save-wallet");
-    const continueBtn = document.getElementById("continue-tasks");
-
-    // Verificar usuario autenticado
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        console.log("🔴 No hay usuario autenticado.");
-        // Mostrar mensaje y botón de registro
-        notLoggedInDiv.style.display = "block";
-        loggedInContentDiv.style.display = "none";
-      } else {
-        console.log("✅ Usuario autenticado:", user);
-        // Mostrar contenido para usuarios autenticados
-        notLoggedInDiv.style.display = "none";
-        loggedInContentDiv.style.display = "block";
-        addNetworkBtn.disabled = false;
-        walletInput.disabled = false;
-      }
-    });
-
-    // Redirigir a registro manualmente
-    goToRegisterBtn.addEventListener("click", () => {
-      window.location.href = "https://fedezam.github.io/trueque/registro.html";
-    });
-
-    // Descargar MetaMask
-    metamaskBtn.addEventListener("click", () => {
-      window.open("https://metamask.io/download/", "_blank");
-    });
-
-    // Agregar la red AMOI a MetaMask
-    addNetworkBtn.addEventListener("click", async () => {
-      try {
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: "0x13882",
-            chainName: "Amoy",
-            nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
-            rpcUrls: ["https://rpc-amoy.polygon.technology"],
-            blockExplorerUrls: ["https://amoy.polygonscan.com"]
-          }]
-        });
-        alert("Red AMOI agregada con éxito.");
-        saveWalletBtn.disabled = false;
-      } catch (error) {
-        alert("Error al agregar la red: " + error.message);
-      }
-    });
-
-  saveWalletBtn.addEventListener("click", async () => {
-  console.log("Botón de guardar wallet clickeado");
-
-  const user = auth.currentUser;
-  const walletAddress = walletInput.value.trim(); // Eliminar espacios en blanco
-
-  console.log("Usuario autenticado:", user ? user.uid : "No hay usuario");
-  console.log("Wallet ingresada:", walletAddress);
-
-  if (!user) {
-    alert("Debes iniciar sesión antes de guardar tu wallet.");
-    return;
-  }
-
-  if (!walletAddress) {
-    alert("Ingresa una dirección de wallet válida.");
-    return;
-  }
-
-  try {
-    await updateDoc(doc(db, "usuarios", user.uid), {
-      wallet: walletAddress,
-    });
-    alert("Wallet guardada correctamente.");
-    continueBtn.style.display = "block";
-  } catch (error) {
-    console.error("Error al guardar la wallet:", error);
-    alert("Hubo un problema al guardar la wallet.");
-  }
-});
-
-  </script>
+  <script src="script.js" type="module"></script>
 </body>
 </html>
+
