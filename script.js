@@ -1,17 +1,17 @@
 // Importar Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { getFirestore, collection, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { getFirestore, collection, setDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
-      apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
-      authDomain: "trueque-28b33.firebaseapp.com",
-      projectId: "trueque-28b33",
-      storageBucket: "trueque-28b33.firebasestorage.app",
-      messagingSenderId: "6430433157",
-      appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
-      measurementId: "G-JMDRX032BS"
+  apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
+  authDomain: "trueque-28b33.firebaseapp.com",
+  projectId: "trueque-28b33",
+  storageBucket: "trueque-28b33.firebasestorage.app",
+  messagingSenderId: "6430433157",
+  appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
+  measurementId: "G-JMDRX032BS"
 };
 
 // Inicializar Firebase
@@ -76,3 +76,32 @@ document.getElementById("google-login").addEventListener("click", async () => {
   }
 });
 
+// Función para guardar la wallet del usuario
+function saveWallet(walletAddress) {
+  const user = auth.currentUser;
+
+  if (user) {
+    try {
+      // Guardar la wallet en Firestore
+      await updateDoc(doc(db, "usuarios", user.uid), {
+        wallet: walletAddress
+      });
+
+      alert("Wallet guardada exitosamente.");
+    } catch (error) {
+      alert("Error al guardar la wallet: " + error.message);
+    }
+  } else {
+    alert("No hay un usuario autenticado.");
+  }
+}
+
+// Aquí deberías tener algún mecanismo para que el usuario ingrese su dirección de wallet
+document.getElementById("save-wallet-btn").addEventListener("click", () => {
+  const walletAddress = document.getElementById("wallet-address").value;
+  if (walletAddress) {
+    saveWallet(walletAddress);
+  } else {
+    alert("Ingresa una dirección de wallet válida.");
+  }
+});
