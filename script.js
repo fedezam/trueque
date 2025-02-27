@@ -1,42 +1,22 @@
-// Importa los módulos de Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+// Importar configuración centralizada de Firebase
+import { auth, db, googleProvider } from "./firebase-config.js";
 import { 
-    getAuth, createUserWithEmailAndPassword, signInWithPopup, 
-    GoogleAuthProvider, updateProfile, onAuthStateChanged 
+    createUserWithEmailAndPassword, signInWithPopup, 
+    updateProfile, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-// Configuración de Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
-    authDomain: "trueque-28b33.firebaseapp.com",
-    projectId: "trueque-28b33",
-    storageBucket: "trueque-28b33.firebasestorage.app",
-    messagingSenderId: "6430433157",
-    appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
-    measurementId: "G-JMDRX032BS"
-};
-
-// Inicializa Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
-const googleProvider = new GoogleAuthProvider();
-
-// Redirige si el usuario ya está autenticado
+// Verifica si el usuario está logueado y lo redirige
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("✅ Usuario autenticado. Redirigiendo a home...");
-        window.location.replace("https://fedezam.github.io/trueque/home.html");
-    } else {
-        console.log("🔴 Usuario NO autenticado. Se queda en registro.");
+        window.location.replace("home.html");
     }
 });
 
-// Función para registrar usuario con email y contraseña
+// Función para registrar usuario
 const registerUser = async (e) => {
     e.preventDefault();
-
     const nombre = document.getElementById("nombre").value;
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -52,11 +32,12 @@ const registerUser = async (e) => {
             uid: user.uid,
             nombre,
             email,
-            telefono
+            telefono,
+            tqc: 0 // Inicializamos en 0
         });
 
         alert("Registro exitoso.");
-        window.location.replace("https://fedezam.github.io/trueque/home.html");
+        window.location.replace("home.html");
     } catch (error) {
         alert("Error: " + error.message);
     }
@@ -67,50 +48,13 @@ const loginWithGoogle = async () => {
     try {
         const result = await signInWithPopup(auth, googleProvider);
         alert("Inicio de sesión con Google exitoso.");
-        window.location.replace("https://fedezam.github.io/trueque/home.html");
+        window.location.replace("home.html");
     } catch (error) {
         alert("Error: " + error.message);
     }
 };
 
-// Eventos de los botones
+// Eventos de botones
 document.getElementById("register-form").addEventListener("submit", registerUser);
 document.getElementById("google-login").addEventListener("click", loginWithGoogle);
 
-//home.html
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAgIPuOIfvYp191JZI9cKLRkKXfGwdaCxM",
-  authDomain: "trueque-28b33.firebaseapp.com",
-  projectId: "trueque-28b33",
-  storageBucket: "trueque-28b33.firebasestorage.app",
-  messagingSenderId: "6430433157",
-  appId: "1:6430433157:web:1e6cf47ee1ed80b127eeec",
-  measurementId: "G-JMDRX032BS"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.replace("registro.html");
-  } else {
-    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-    let userName = user.displayName || "Usuario";
-    let tqc = 0;
-
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      userName = userData.nombre || userName;
-      tqc = userData.tqc || 0;
-    }
-
-    document.getElementById("welcome-message").textContent = `Bienvenido ${userName}`;
-    document.getElementById("tqc-balance").textContent = `Tienes (${tqc}) TqC`;
-  }
-});
