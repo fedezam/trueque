@@ -11,8 +11,11 @@ const tqcBalance = document.getElementById("tqc-balance");
 
 // Detectar usuario autenticado
 onAuthStateChanged(auth, async (user) => {
-    if (user) {
+    if (user && user.uid) {
         try {
+            console.log("🔍 Usuario autenticado:", user);
+            if (!db) throw new Error("Firestore no está inicializado correctamente.");
+            
             const userRef = doc(db, "usuarios", user.uid);
             const userDoc = await getDoc(userRef);
             
@@ -26,12 +29,13 @@ onAuthStateChanged(auth, async (user) => {
                     continueButton.style.display = "block";
                 }
             } else {
-                console.error("❌ No se encontraron datos del usuario en Firestore.");
+                console.warn("⚠️ No se encontraron datos del usuario en Firestore.");
             }
         } catch (error) {
             console.error("❌ Error obteniendo datos del usuario:", error);
         }
     } else {
+        console.warn("⚠️ No hay usuario autenticado o falta UID.");
         alert("No has iniciado sesión.");
         window.location.href = "registro.html"; // Redirige si no hay sesión
     }
@@ -40,8 +44,9 @@ onAuthStateChanged(auth, async (user) => {
 // Guardar dirección de wallet en Firestore
 saveWalletButton.addEventListener("click", async () => {
     const user = auth.currentUser;
-    if (user && walletInput.value.trim() !== "") {
+    if (user && user.uid && walletInput.value.trim() !== "") {
         try {
+            console.log("💾 Guardando wallet para:", user.uid);
             const userRef = doc(db, "usuarios", user.uid);
             await updateDoc(userRef, { wallet: walletInput.value.trim() });
             alert("✅ Wallet guardada correctamente.");
@@ -51,6 +56,6 @@ saveWalletButton.addEventListener("click", async () => {
             alert("Error al guardar la wallet.");
         }
     } else {
-        alert("Ingresa una dirección de wallet válida.");
+        alert("Ingresa una dirección de wallet válida o inicia sesión.");
     }
 });
