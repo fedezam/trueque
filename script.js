@@ -1,19 +1,11 @@
 // Importamos los módulos de Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import { firebaseConfig } from "./firebase.config.js";
-
-// Inicializamos Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+import { auth, db, googleProvider } from "./firebase-config.js";
+import { getAuth, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 // 📌 Función para guardar el usuario en Firestore
 const saveUserToFirestore = async (user, additionalData = {}) => {
     if (!user) return;
-    
     try {
         const userRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(userRef);
@@ -37,20 +29,17 @@ const saveUserToFirestore = async (user, additionalData = {}) => {
 };
 
 // 📌 Registro con Google
-const loginWithGoogle = async () => {
+document.getElementById("google-login").addEventListener("click", async () => {
     try {
         const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-
-        await saveUserToFirestore(user);
+        await saveUserToFirestore(result.user);
         alert("Inicio de sesión con Google exitoso.");
-        
         window.location.replace("home.html");
     } catch (error) {
         console.error("❌ Error con Google:", error);
         alert("Error: " + error.message);
     }
-};
+});
 
 // 📌 Registro manual con email y contraseña
 document.getElementById("register-form").addEventListener("submit", async (event) => {
@@ -63,11 +52,8 @@ document.getElementById("register-form").addEventListener("submit", async (event
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        await saveUserToFirestore(user, { nombre, telefono });
+        await saveUserToFirestore(userCredential.user, { nombre, telefono });
         alert("Registro exitoso.");
-        
         window.location.replace("home.html");
     } catch (error) {
         console.error("❌ Error en el registro:", error);
@@ -83,5 +69,3 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// 📌 Evento para el botón de Google
-document.getElementById("google-login").addEventListener("click", loginWithGoogle);
