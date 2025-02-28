@@ -12,22 +12,28 @@ const tqcBalance = document.getElementById("tqc-balance");
 // Detectar usuario autenticado
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        const userRef = doc(db, "usuarios", user.uid);
-        const userDoc = await getDoc(userRef);
-        
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            welcomeMessage.textContent = `Bienvenido, ${userData.nombre}`;
-            tqcBalance.textContent = `Tienes (${userData.tqc}) TqC`;
+        try {
+            const userRef = doc(db, "usuarios", user.uid);
+            const userDoc = await getDoc(userRef);
             
-            if (userData.wallet) {
-                walletInput.value = userData.wallet;
-                continueButton.style.display = "block";
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                welcomeMessage.textContent = `Bienvenido, ${userData.nombre || 'Usuario'}`;
+                tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
+                
+                if (userData.wallet) {
+                    walletInput.value = userData.wallet;
+                    continueButton.style.display = "block";
+                }
+            } else {
+                console.error("❌ No se encontraron datos del usuario en Firestore.");
             }
+        } catch (error) {
+            console.error("❌ Error obteniendo datos del usuario:", error);
         }
     } else {
         alert("No has iniciado sesión.");
-        window.location.replace("registro.html");
+        window.location.href = "registro.html"; // Redirige si no hay sesión
     }
 });
 
