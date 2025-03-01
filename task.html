@@ -79,7 +79,7 @@
   <header>
     <div class="user-info">
       <h2 id="welcome-message">Bienvenido</h2>
-      <span id="tqc-balance">Tienes (X) TqC</span>
+      <span id="tqc-balance">Tienes 0 TqC</span>
     </div>
   </header>
     <main id="comercios-container">
@@ -89,50 +89,71 @@
     <script type="module">
         import { auth, db } from "./firebase-config.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        let currentUser;
 
         // Verificación de autenticación
-        onAuthStateChanged(auth, user => {
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "registro.html";
             } else {
+                currentUser = user;
                 document.getElementById("welcome-message").textContent = `Bienvenido, ${user.displayName || 'Usuario'}`;
+                await actualizarSaldoTqC();
                 cargarComercios();
             }
         });
 
+        // Actualizar saldo de TqC del usuario
+        async function actualizarSaldoTqC() {
+            const userRef = doc(db, "usuarios", currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const tqc = userSnap.data().tqc || 0;
+                document.getElementById("tqc-balance").textContent = `Tienes ${tqc} TqC`;
+            }
+        }
+
         // Cargar comercios desde Firestore
         async function cargarComercios() {
             const container = document.getElementById("comercios-container");
-            const comerciosSnapshot = await getDocs(collection(db, "comercios"));
+            const comerciosSnapshot = await getDocs(collection(db, "clientes"));
             comerciosSnapshot.forEach(doc => {
                 let data = doc.data();
                 let comercioDiv = document.createElement("div");
                 comercioDiv.classList.add("comercio");
                 comercioDiv.innerHTML = `
-                    <img src="${data.imagen}" alt="${data.nombre}">
                     <h2>${data.nombre}</h2>
-                    <p>${data.descripcion}</p>
-                    <button onclick="visitarComercio('${data.link}')">Apoya a este comercio</button>
+                    <button onclick="visitarComercio('${doc.id}', '${data.enlace}', ${data.tqc})">Apoya a este comercio</button>
                 `;
                 container.appendChild(comercioDiv);
             });
         }
 
-        // Función para visitar comercio y verificar permanencia
-        function visitarComercio(link) {
+        // Función para visitar comercio y sumar TqC
+        async function visitarComercio(clienteId, link, tqcGanado) {
             let ventana = window.open(link, "_blank");
             let tiempoInicio = Date.now();
             
-            let verificarTiempo = setInterval(() => {
+            let verificarTiempo = setInterval(async () => {
                 let tiempoTranscurrido = (Date.now() - tiempoInicio) / 1000;
                 if (tiempoTranscurrido >= 30) {
                     clearInterval(verificarTiempo);
-                    console.log("Visita validada"); // Aquí puedes añadir lógica de validación con la API de Linkvertise
+                    console.log("Visita validada");
+                    
+                    const userRef = doc(db, "usuarios", currentUser.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        let tqcActual = userSnap.data().tqc || 0;
+                        await updateDoc(userRef, { tqc: tqcActual + tqcGanado });
+                        actualizarSaldoTqC();
+                    }
                 }
             }, 1000);
         }
     </script>
 </body>
 </html>
+
 
