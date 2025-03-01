@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visita nuestros anunciantes</title>
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="script.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="user-info">
+      <h2 id="welcome-message">Bienvenido</h2>
+      <span id="tqc-balance">Tienes (X) TqC</span>
+    </div>
+  </header>
+    <main id="comercios-container">
+        <!-- Los comercios se cargarán aquí dinámicamente -->
+    </main>
+
+    <script type="module">
+        import { auth, db } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        // Verificación de autenticación
+        onAuthStateChanged(auth, user => {
+            if (!user) {
+                window.location.href = "registro.html";
+            } else {
+                document.getElementById("welcome-message").textContent = `Bienvenido, ${user.displayName || 'Usuario'}`;
+                cargarComercios();
+            }
+        });
+
+        // Cargar comercios desde Firestore
+        async function cargarComercios() {
+            const container = document.getElementById("comercios-container");
+            const comerciosSnapshot = await getDocs(collection(db, "comercios"));
+            comerciosSnapshot.forEach(doc => {
+                let data = doc.data();
+                let comercioDiv = document.createElement("div");
+                comercioDiv.classList.add("comercio");
+                comercioDiv.innerHTML = `
+                    <img src="${data.imagen}" alt="${data.nombre}">
+                    <h2>${data.nombre}</h2>
+                    <p>${data.descripcion}</p>
+                    <button onclick="visitarComercio('${data.link}')">Apoya a este comercio</button>
+                `;
+                container.appendChild(comercioDiv);
+            });
+        }
+
+        // Función para visitar comercio y verificar permanencia
+        function visitarComercio(link) {
+            let ventana = window.open(link, "_blank");
+            let tiempoInicio = Date.now();
+            
+            let verificarTiempo = setInterval(() => {
+                let tiempoTranscurrido = (Date.now() - tiempoInicio) / 1000;
+                if (tiempoTranscurrido >= 30) {
+                    clearInterval(verificarTiempo);
+                    console.log("Visita validada"); // Aquí puedes añadir lógica de validación con la API de Linkvertise
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
