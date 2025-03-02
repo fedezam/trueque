@@ -125,12 +125,13 @@
             const horas = Math.floor((TIEMPO_ESPERA_MS - tiempoTranscurrido) / (1000 * 60 * 60));
             const minutos = Math.floor(((TIEMPO_ESPERA_MS - tiempoTranscurrido) % (1000 * 60 * 60)) / (1000 * 60));
             avisoTiempo.textContent = `Vuelve en ${horas}h ${minutos}m para recibir nuevas tareas.`;
+            cargarComercios(tareasCompletadas); // Pasar tareas completadas para filtrar
             return;
         }
         
         await updateDoc(userRef, { tareasCompletadas: [] }); // Resetear tareas
         avisoTiempo.textContent = "Puedes recibir nuevas tareas ahora.";
-        cargarComercios([]);
+        cargarComercios([]); // Cargar comercios sin tareas completadas
     });
 
     async function cargarComercios(tareasCompletadas) {
@@ -138,6 +139,7 @@
         let tareas = [];
         comerciosSnapshot.forEach(docSnap => tareas.push({ id: docSnap.id, ...docSnap.data() }));
         
+        // Filtrar tareas que ya han sido completadas
         const tareasDisponibles = tareas.filter(t => !tareasCompletadas.includes(t.id)).sort(() => 0.5 - Math.random()).slice(0, 3);
         container.innerHTML = "";
         tareasDisponibles.forEach(data => {
@@ -150,6 +152,11 @@
             `;
             container.appendChild(comercioDiv);
         });
+
+        // Si no hay tareas disponibles, mostrar un mensaje
+        if (tareasDisponibles.length === 0) {
+            container.innerHTML = "<p>No hay tareas disponibles en este momento.</p>";
+        }
     }
 
     // Exponer la función en el ámbito global
@@ -171,6 +178,3 @@
         }
     }
 </script>
-</body>
-</html>
-
