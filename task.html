@@ -1,51 +1,150 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visita nuestros anunciantes</title>
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="script.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
 
-.container {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
+        header {
+            width: 100%;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
 
-.btn, button {
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 5px;
-}
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: auto;
+        }
 
-input {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-header {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  text-align: right;
-}
+        main {
+            margin-top: 100px;
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
 
-.user-info {
-  background-color: rgba(255, 255, 255, 0.8);
-  color: black;
-  padding: 10px;
-  border-radius: 8px;
-}
+        .comercio {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .comercio img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .comercio button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+    <script type="module">
+        import { auth, db } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let currentUser;
+
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = "registro.html";
+                } else {
+                    currentUser = user;
+                    document.getElementById("welcome-message").textContent = `Bienvenido, ${user.displayName || 'Usuario'}`;
+                    cargarComercios();
+                }
+            });
+
+            async function cargarComercios() {
+                const container = document.getElementById("comercios-container");
+                const comerciosSnapshot = await getDocs(collection(db, "clientes"));
+                container.innerHTML = "";
+                comerciosSnapshot.forEach(docSnap => {
+                    let data = docSnap.data();
+                    if (data.enlace && data.enlace.startsWith("http")) {
+                        let comercioDiv = document.createElement("div");
+                        comercioDiv.classList.add("comercio");
+                        comercioDiv.innerHTML = `
+                            <h2>${data.nombre}</h2>
+                            <button onclick="visitarComercio('${data.enlace}', ${data.tqc})">Apoya a este comercio</button>
+                        `;
+                        container.appendChild(comercioDiv);
+                    } else {
+                        console.warn("Enlace inválido para", data.nombre);
+                    }
+                });
+            }
+        });
+
+        window.visitarComercio = async function(link, tqcGanado) {
+            let ventana = window.open(link, "_blank");
+            let tiempoInicio = Date.now();
+            
+            let verificarTiempo = setInterval(async () => {
+                let tiempoTranscurrido = (Date.now() - tiempoInicio) / 1000;
+                if (tiempoTranscurrido >= 30) {
+                    clearInterval(verificarTiempo);
+                    console.log("Visita validada");
+                    
+                    const userRef = doc(db, "usuarios", auth.currentUser.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        let tqcActual = userSnap.data().tqc || 0;
+                        await updateDoc(userRef, { tqc: tqcActual + tqcGanado });
+                        document.getElementById("tqc-balance").textContent = `Tienes ${tqcActual + tqcGanado} TqC`;
+                    }
+                }
+            }, 1000);
+        }
+    </script>
+</head>
+<body>
+  <header>
+    <div class="user-info">
+      <h2 id="welcome-message">Bienvenido</h2>
+      <span id="tqc-balance">Tienes 0 TqC</span>
+    </div>
+  </header>
+    <main id="comercios-container">
+        <!-- Los comercios se cargarán aquí dinámicamente -->
+    </main>
+</body>
+</html>
 
