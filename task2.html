@@ -98,7 +98,7 @@
       <!-- Los comercios se cargarán aquí dinámicamente -->
   </main>
   
-  <script type="module">
+<script type="module">
     import { auth, db } from "./firebase-config.js";
     import { getDoc, doc, updateDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
@@ -146,13 +146,14 @@
             comercioDiv.innerHTML = `
                 <img src="assets/${data.nombre.toLowerCase().replace(/\s+/g, '-')}.jpg" alt="${data.nombre}">
                 <h2>${data.nombre}</h2>
-                <button onclick="verificarTarea('${data.id}')">Completar Tarea</button>
+                <button onclick="verificarTarea('${data.id}', '${data.url}')">Completar Tarea</button>
             `;
             container.appendChild(comercioDiv);
         });
     }
 
-    async function verificarTarea(tareaId) {
+    // Exponer la función en el ámbito global
+    window.verificarTarea = async function(tareaId, url) {
         const userRef = doc(db, "usuarios", auth.currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) return;
@@ -165,10 +166,11 @@
                 tareasCompletadas: tareasCompletadas,
                 timestampUltimaTarea: serverTimestamp()
             });
-            location.reload();
+            // Redirigir al usuario al enlace del cliente
+            window.location.href = url;
         }
     }
-  </script>
+</script>
 </body>
 </html>
 
