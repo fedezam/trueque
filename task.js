@@ -1,19 +1,45 @@
+// Importar módulos de Firebase
 import { auth, db } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-    let currentUser;
+const walletInput = document.getElementById("wallet-address");
+const saveWalletButton = document.getElementById("save-wallet");
+const continueButton = document.getElementById("continue-tasks");
+const welcomeMessage = document.getElementById("welcome-message");
+const tqcBalance = document.getElementById("tqc-balance");
 
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            window.location.href = "registro.html";
-        } else {
-            currentUser = user;
-            document.getElementById("welcome-message").textContent = `Bienvenido, ${user.displayName || 'Usuario'}`;
-            cargarComercios();
+// Detectar usuario autenticado
+onAuthStateChanged(auth, async (user) => {
+    if (user && user.uid) {
+        try {
+            console.log("🔍 Usuario autenticado:", user);
+            if (!db) throw new Error("Firestore no está inicializado correctamente.");
+            
+            const userRef = doc(db, "usuarios", user.uid);
+            const userDoc = await getDoc(userRef);
+            
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                welcomeMessage.textContent = `Bienvenido, ${userData.nombre || 'Usuario'}`;
+                tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
+                
+                if (userData.wallet) {
+                    walletInput.value = userData.wallet;
+                    continueButton.style.display = "block";
+                }
+            } else {
+                console.warn("⚠️ No se encontraron datos del usuario en Firestore.");
+            }
+        } catch (error) {
+            console.error("❌ Error obteniendo datos del usuario:", error);
         }
-    });
+    } else {
+        console.warn("⚠️ No hay usuario autenticado o falta UID.");
+        alert("No has iniciado sesión.");
+        window.location.href = "registro.html"; // Redirige si no hay sesión
+    }
+});
 
     async function cargarComercios() {
         const container = document.getElementById("comercios-container");
