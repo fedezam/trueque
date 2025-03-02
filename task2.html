@@ -1,55 +1,101 @@
-import { auth, db } from "./firebase-config.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { collection, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-
-const welcomeMessage = document.getElementById("welcome-message");
-const tqcBalance = document.getElementById("tqc-balance");
-const container = document.getElementById("comercios-container");
-const avisoTiempo = document.createElement("p");
-avisoTiempo.id = "aviso-tiempo";
-container.before(avisoTiempo);
-
-const TIEMPO_ESPERA_MS = 5 * 60 * 60 * 1000; // 5 horas en milisegundos
-
-// Detectar usuario autenticado y cargar datos
-onAuthStateChanged(auth, async (user) => {
-    if (user && user.uid) {
-        try {
-            console.log("🔍 Usuario autenticado:", user);
-            if (!db) throw new Error("Firestore no está inicializado correctamente.");
-            
-            const userRef = doc(db, "usuarios", user.uid);
-            const userDoc = await getDoc(userRef);
-            
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                welcomeMessage.textContent = `Bienvenido, ${userData.nombre || 'Usuario'}`;
-                tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
-                
-                const ultimaTarea = userData.timestampUltimaTarea?.toMillis() || 0;
-                const tiempoTranscurrido = Date.now() - ultimaTarea;
-                const tiempoRestante = TIEMPO_ESPERA_MS - tiempoTranscurrido;
-                
-                if (tiempoTranscurrido >= TIEMPO_ESPERA_MS) {
-                    await updateDoc(userRef, { tareasCompletadas: [] }); // Resetear tareas completadas
-                    avisoTiempo.textContent = "Puedes recibir nuevas tareas ahora.";
-                    cargarComercios([]);
-                } else {
-                    const horas = Math.floor(tiempoRestante / (1000 * 60 * 60));
-                    const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
-                    avisoTiempo.textContent = `Vuelve en ${horas}h ${minutos}m para recibir nuevas tareas.`;
-                    cargarComercios(userData.tareasCompletadas || []);
-                }
-            } else {
-                console.warn("⚠️ No se encontraron datos del usuario en Firestore.");
-                cargarComercios([]);
-            }
-        } catch (error) {
-            console.error("❌ Error obteniendo datos del usuario:", error);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visita nuestros anunciantes</title>
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="comercios.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
         }
-    } else {
-        console.warn("⚠️ No hay usuario autenticado o falta UID.");
-        alert("No has iniciado sesión.");
-        window.location.href = "registro.html";
-    }
-});
+
+        header {
+            width: 100%;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        main {
+            margin-top: 100px;
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .comercio {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .comercio img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .comercio button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #aviso-tiempo {
+            margin-top: 20px;
+            font-size: 18px;
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+  <header>
+    <div class="user-info">
+      <h2 id="welcome-message">Bienvenido</h2>
+      <span id="tqc-balance">Tienes 0 TqC</span>
+    </div>
+  </header>
+  
+  <p id="aviso-tiempo">Cargando tiempo restante...</p>
+    
+  <main id="comercios-container">
+      <!-- Los comercios se cargarán aquí dinámicamente -->
+  </main>
+</body>
+</html>
