@@ -1,15 +1,12 @@
-// Importar módulos de Firebase
 import { auth, db } from "./firebase-config.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-const walletInput = document.getElementById("wallet-address");
-const saveWalletButton = document.getElementById("save-wallet");
-const continueButton = document.getElementById("continue-tasks");
 const welcomeMessage = document.getElementById("welcome-message");
 const tqcBalance = document.getElementById("tqc-balance");
+const container = document.getElementById("comercios-container");
 
-// Detectar usuario autenticado
+// Detectar usuario autenticado y cargar datos
 onAuthStateChanged(auth, async (user) => {
     if (user && user.uid) {
         try {
@@ -23,26 +20,24 @@ onAuthStateChanged(auth, async (user) => {
                 const userData = userDoc.data();
                 welcomeMessage.textContent = `Bienvenido, ${userData.nombre || 'Usuario'}`;
                 tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
-                
-                if (userData.wallet) {
-                    walletInput.value = userData.wallet;
-                    continueButton.style.display = "block";
-                }
             } else {
                 console.warn("⚠️ No se encontraron datos del usuario en Firestore.");
             }
+            
+            cargarComercios();
         } catch (error) {
             console.error("❌ Error obteniendo datos del usuario:", error);
         }
     } else {
         console.warn("⚠️ No hay usuario autenticado o falta UID.");
         alert("No has iniciado sesión.");
-        window.location.href = "registro.html"; // Redirige si no hay sesión
+        window.location.href = "registro.html";
     }
 });
 
-    async function cargarComercios() {
-        const container = document.getElementById("comercios-container");
+// Cargar comercios desde Firestore
+async function cargarComercios() {
+    try {
         const comerciosSnapshot = await getDocs(collection(db, "clientes"));
         container.innerHTML = "";
         comerciosSnapshot.forEach(docSnap => {
@@ -59,9 +54,12 @@ onAuthStateChanged(auth, async (user) => {
             
             container.appendChild(comercioDiv);
         });
+    } catch (error) {
+        console.error("❌ Error cargando comercios:", error);
     }
-});
+}
 
+// Visitar comercio con cuenta regresiva
 window.visitarComercio = function(button, link, tqcGanado) {
     button.disabled = true;
     button.textContent = "Esperando... 30s";
@@ -81,14 +79,16 @@ window.visitarComercio = function(button, link, tqcGanado) {
     window.open(link, "_blank");
 }
 
+// Verificar y sumar TQC
 async function verificarTarea(button, tqcGanado) {
     const userRef = doc(db, "usuarios", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
         let tqcActual = userSnap.data().tqc || 0;
         await updateDoc(userRef, { tqc: tqcActual + tqcGanado });
-        document.getElementById("tqc-balance").textContent = `Tienes ${tqcActual + tqcGanado} TqC`;
+        tqcBalance.textContent = `Tienes (${tqcActual + tqcGanado}) TqC`;
         button.textContent = "Tarea Completada";
         button.disabled = true;
     }
 }
+
