@@ -97,5 +97,78 @@
   <main id="comercios-container">
       <!-- Los comercios se cargarán aquí dinámicamente -->
   </main>
+  
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { getDoc, doc, updateDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    const TIEMPO_ESPERA_MS = 5 * 60 * 60 * 1000; // 5 horas
+    const container = document.getElementById("comercios-container");
+    const avisoTiempo = document.getElementById("aviso-tiempo");
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "registro.html";
+            return;
+        }
+        
+        const userRef = doc(db, "usuarios", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return;
+        
+        const userData = userSnap.data();
+        const tareasCompletadas = userData.tareasCompletadas || [];
+        const ultimaTarea = userData.timestampUltimaTarea?.toMillis() || 0;
+        const tiempoTranscurrido = Date.now() - ultimaTarea;
+        
+        if (tiempoTranscurrido < TIEMPO_ESPERA_MS) {
+            const horas = Math.floor((TIEMPO_ESPERA_MS - tiempoTranscurrido) / (1000 * 60 * 60));
+            const minutos = Math.floor(((TIEMPO_ESPERA_MS - tiempoTranscurrido) % (1000 * 60 * 60)) / (1000 * 60));
+            avisoTiempo.textContent = `Vuelve en ${horas}h ${minutos}m para recibir nuevas tareas.`;
+            return;
+        }
+        
+        await updateDoc(userRef, { tareasCompletadas: [] }); // Resetear tareas
+        avisoTiempo.textContent = "Puedes recibir nuevas tareas ahora.";
+        cargarComercios([]);
+    });
+
+    async function cargarComercios(tareasCompletadas) {
+        const comerciosSnapshot = await getDocs(collection(db, "clientes"));
+        let tareas = [];
+        comerciosSnapshot.forEach(docSnap => tareas.push({ id: docSnap.id, ...docSnap.data() }));
+        
+        const tareasDisponibles = tareas.filter(t => !tareasCompletadas.includes(t.id)).sort(() => 0.5 - Math.random()).slice(0, 3);
+        container.innerHTML = "";
+        tareasDisponibles.forEach(data => {
+            let comercioDiv = document.createElement("div");
+            comercioDiv.classList.add("comercio");
+            comercioDiv.innerHTML = `
+                <img src="assets/${data.nombre.toLowerCase().replace(/\s+/g, '-')}.jpg" alt="${data.nombre}">
+                <h2>${data.nombre}</h2>
+                <button onclick="verificarTarea('${data.id}')">Completar Tarea</button>
+            `;
+            container.appendChild(comercioDiv);
+        });
+    }
+
+    async function verificarTarea(tareaId) {
+        const userRef = doc(db, "usuarios", auth.currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return;
+
+        let userData = userSnap.data();
+        let tareasCompletadas = userData.tareasCompletadas || [];
+        if (!tareasCompletadas.includes(tareaId)) {
+            tareasCompletadas.push(tareaId);
+            await updateDoc(userRef, {
+                tareasCompletadas: tareasCompletadas,
+                timestampUltimaTarea: serverTimestamp()
+            });
+            location.reload();
+        }
+    }
+  </script>
 </body>
 </html>
+
