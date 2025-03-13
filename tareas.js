@@ -14,10 +14,10 @@ onAuthStateChanged(auth, async (user) => {
         try {
             console.log("🔍 Usuario autenticado:", user);
             if (!db) throw new Error("Firestore no está inicializado correctamente.");
-            
+
             const userRef = doc(db, "usuarios", user.uid);
             const userDoc = await getDoc(userRef);
-            
+
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 welcomeMessage.textContent = `Bienvenido, ${userData.nombre || 'Usuario'}`;
@@ -43,15 +43,24 @@ async function cargarTareas() {
     try {
         const tasksRef = collection(db, "clientes");
         const tasksSnapshot = await getDocs(tasksRef);
-        
+
+        console.log("📂 Documentos obtenidos de 'clientes':", tasksSnapshot.docs.length);
+
         let tasksArray = [];
         tasksSnapshot.forEach((doc) => {
             const clientData = doc.data();
-            if (clientData.enlaces && clientData.enlaces.length > 0) {
-                // Añadir enlaces aleatorios de la lista de cada comercio
-                tasksArray.push({ nombre: clientData.nombre, enlaces: clientData.enlaces, tqc: clientData.tqc });
+            console.log("📄 Datos del documento:", clientData);
+
+            if (clientData.enlace) { // Verifica que el campo "enlace" exista
+                tasksArray.push({
+                    nombre: clientData.nombre,
+                    enlace: clientData.enlace,
+                    tqc: clientData.asignedTQC // Usa el campo correcto
+                });
             }
         });
+
+        console.log("📋 Tareas filtradas:", tasksArray);
 
         // Mostrar solo 5 tareas aleatorias
         tasksArray = tasksArray.sort(() => Math.random() - 0.5).slice(0, 5);
@@ -61,19 +70,18 @@ async function cargarTareas() {
             const taskElement = document.createElement("div");
             taskElement.classList.add("task-item");
 
-            task.enlaces.forEach((enlace, index) => {
-                const taskLink = document.createElement("a");
-                taskLink.href = enlace;
-                taskLink.textContent = `DALE TU APOYO A ESTE COMERCIO ${task.nombre} - Enlace ${index + 1}`;
-                taskLink.target = "_blank";
-                taskElement.appendChild(taskLink);
+            // Crear el enlace
+            const taskLink = document.createElement("a");
+            taskLink.href = task.enlace;
+            taskLink.textContent = `DALE TU APOYO A ESTE COMERCIO: ${task.nombre}`;
+            taskLink.target = "_blank";
+            taskElement.appendChild(taskLink);
 
-                // Agregar un botón para verificar la visita
-                const verifyButton = document.createElement("button");
-                verifyButton.textContent = "Verificar Visita";
-                verifyButton.addEventListener("click", () => verificarVisita(task, enlace));
-                taskElement.appendChild(verifyButton);
-            });
+            // Agregar un botón para verificar la visita
+            const verifyButton = document.createElement("button");
+            verifyButton.textContent = "Verificar Visita";
+            verifyButton.addEventListener("click", () => verificarVisita(task));
+            taskElement.appendChild(verifyButton);
 
             tasksContainer.appendChild(taskElement);
         });
@@ -83,19 +91,27 @@ async function cargarTareas() {
 }
 
 // Verificar la visita al enlace
-async function verificarVisita(task, enlace) {
-    // Aquí iría la lógica para verificar la visita, dependiendo del sistema del acortador
-    // De momento, asumimos que la visita es exitosa
-    alert("¡Visita verificada! Ganaste " + task.tqc + " TqC por esta tarea.");
-    // Actualizar los TqC del usuario
-    const userRef = doc(db, "usuarios", auth.currentUser.uid);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-        const userData = userDoc.data();
-        await updateDoc(userRef, {
-            tqc: userData.tqc + task.tqc
-        });
-        console.log(`TqC actualizados: ${userData.tqc + task.tqc}`);
-        tqcBalance.textContent = `Tienes (${userData.tqc + task.tqc}) TqC`;
+async function verificarVisita(task) {
+    try {
+        // Mostrar mensaje de éxito
+        alert(`¡Visita verificada! Ganaste ${task.tqc} TqC por apoyar a ${task.nombre}.`);
+
+        // Actualizar los TqC del usuario en Firestore
+        const userRef = doc(db, "usuarios", auth.currentUser.uid);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const newTqc = (userData.tqc || 0) + task.tqc; // Sumar la recompensa
+
+            await updateDoc(userRef, {
+                tqc: newTqc
+            });
+
+            console.log(`TqC actualizados: ${newTqc}`);
+            tqcBalance.textContent = `Tienes (${newTqc}) TqC`; // Actualizar el balance en la UI
+        }
+    } catch (error) {
+        console.error("❌ Error verificando la visita:", error);
     }
 }
