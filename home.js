@@ -59,3 +59,18 @@ saveWalletButton.addEventListener("click", async () => {
         alert("Ingresa una dirección de wallet válida o inicia sesión.");
     }
 });
+
+// Esperar a que el DOM esté completamente cargado
+document.addEventListener('DOMContentLoaded', function () {
+  // Obtener el botón "Continuar a tareas"
+  const continueTasksButton = document.getElementById('continue-tasks');
+
+  // Verificar si el botón existe
+  if (continueTasksButton) {
+    // Agregar un evento de clic al botón
+    continueTasksButton.addEventListener('click', function () {
+      // Redirigir a tareas.html
+      window.location.href = 'tareas.html';
+    });
+  }
+});
