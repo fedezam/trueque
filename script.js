@@ -1,16 +1,22 @@
-// Importamos los módulos de Firebase
+
 import { auth, db, googleProvider } from "./firebase-config.js";
-import { getAuth, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { 
+    getAuth, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { 
+    doc, getDoc, setDoc, updateDoc 
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 // 📌 Función para guardar el usuario en Firestore
 const saveUserToFirestore = async (user, additionalData = {}) => {
     if (!user) return;
+
     try {
         const userRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(userRef);
 
         if (!userDoc.exists()) {
+            // 🔹 Crear un nuevo usuario en Firestore
             await setDoc(userRef, {
                 uid: user.uid,
                 nombre: user.displayName || additionalData.nombre || "Usuario",
@@ -21,7 +27,14 @@ const saveUserToFirestore = async (user, additionalData = {}) => {
             });
             console.log("✅ Usuario guardado en Firestore.");
         } else {
-            console.log("ℹ️ El usuario ya existía en Firestore.");
+            // 🔹 Si el usuario ya existe, actualiza la información relevante
+            await updateDoc(userRef, {
+                nombre: user.displayName || userDoc.data().nombre,
+                email: user.email,
+                foto: user.photoURL || userDoc.data().foto,
+                telefono: additionalData.telefono || userDoc.data().telefono
+            });
+            console.log("ℹ️ Usuario actualizado en Firestore.");
         }
     } catch (error) {
         console.error("❌ Error al guardar en Firestore:", error);
@@ -68,4 +81,3 @@ onAuthStateChanged(auth, async (user) => {
         await saveUserToFirestore(user);
     }
 });
-
