@@ -1,4 +1,3 @@
-
 import { auth, db, googleProvider } from "./firebase-config.js";
 import { 
     getAuth, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged 
@@ -7,7 +6,7 @@ import {
     doc, getDoc, setDoc, updateDoc 
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-// 📌 Función para guardar el usuario en Firestore
+// 📌 Función para guardar el usuario en Firestore (evita duplicados)
 const saveUserToFirestore = async (user, additionalData = {}) => {
     if (!user) return;
 
@@ -16,7 +15,7 @@ const saveUserToFirestore = async (user, additionalData = {}) => {
         const userDoc = await getDoc(userRef);
 
         if (!userDoc.exists()) {
-            // 🔹 Crear un nuevo usuario en Firestore
+            // 🔹 Crear usuario solo si NO existe en Firestore
             await setDoc(userRef, {
                 uid: user.uid,
                 nombre: user.displayName || additionalData.nombre || "Usuario",
@@ -27,19 +26,29 @@ const saveUserToFirestore = async (user, additionalData = {}) => {
             });
             console.log("✅ Usuario guardado en Firestore.");
         } else {
-            // 🔹 Si el usuario ya existe, actualiza la información relevante
-            await updateDoc(userRef, {
-                nombre: user.displayName || userDoc.data().nombre,
-                email: user.email,
-                foto: user.photoURL || userDoc.data().foto,
-                telefono: additionalData.telefono || userDoc.data().telefono
-            });
-            console.log("ℹ️ Usuario actualizado en Firestore.");
+            console.log("ℹ️ El usuario ya existe en Firestore.");
         }
     } catch (error) {
         console.error("❌ Error al guardar en Firestore:", error);
     }
 };
+
+// 📌 Detectar si el usuario ya está autenticado al cargar la página
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        console.log("✅ Usuario autenticado:", user);
+
+        // Guarda el usuario solo si no existe en Firestore
+        await saveUserToFirestore(user);
+
+        // 🔹 Redirigir automáticamente si ya está logueado
+        if (window.location.pathname.includes("registro.html")) {
+            window.location.replace("home.html");
+        }
+    } else {
+        console.log("⚠️ No hay usuario autenticado.");
+    }
+});
 
 // 📌 Registro con Google
 document.getElementById("google-login").addEventListener("click", async () => {
@@ -74,10 +83,3 @@ document.getElementById("register-form").addEventListener("submit", async (event
     }
 });
 
-// 📌 Detectar cambios en la autenticación
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        console.log("✅ Usuario autenticado:", user);
-        await saveUserToFirestore(user);
-    }
-});
