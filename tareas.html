@@ -4,17 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tareas</title>
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"></script>
-    
-    <!-- Linkvertise (Monetización automática de enlaces) -->
-    <script src="https://publisher.linkvertise.com/cdn/linkvertise.js"></script>
-    <script>linkvertise(1306833, {whitelist: [], blacklist: [""]});</script>
-
-    <script src="tareas.js" type="module"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,9 +17,17 @@
     <h1>APOYA A LOS COMERCIOS Y EMPRENDEDORES LOCALES</h1>
     
     <div id="tasks-container">
-        <!-- Las tareas se cargarán aquí dinámicamente -->
+        <!-- Las tareas se insertarán aquí dinámicamente -->
     </div>
-    
-    <script src="firebase-config.js"></script>
+
+    <!-- Firebase y el script de tareas deben ser cargados como módulos -->
+    <script type="module" src="tareas.js"></script>
+
+    <!-- Script de Linkvertise -->
+    <script src="https://publisher.linkvertise.com/cdn/linkvertise.js"></script>
+    <script>
+        linkvertise(1306833, { whitelist: [], blacklist: [""] });
+    </script>
 </body>
 </html>
+
