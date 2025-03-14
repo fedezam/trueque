@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tareas</title>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"></script>
+    
+    <!-- Linkvertise (Monetización automática de enlaces) -->
+    <script src="https://publisher.linkvertise.com/cdn/linkvertise.js"></script>
+    <script>linkvertise(1306833, {whitelist: [], blacklist: [""]});</script>
+
     <script src="tareas.js" type="module"></script>
-    <link rel="stylesheet" href="styles.css"> <!-- Tu archivo CSS ya existente -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
@@ -21,9 +28,9 @@
     <h1>APOYA A LOS COMERCIOS Y EMPRENDEDORES LOCALES</h1>
     
     <div id="tasks-container">
-        <!-- Las tareas serán agregadas dinámicamente aquí -->
+        <!-- Las tareas se cargarán aquí dinámicamente -->
     </div>
     
-    <script src="firebase-config.js"></script> <!-- Asegúrate de tener tu archivo de configuración -->
+    <script src="firebase-config.js"></script>
 </body>
 </html>
