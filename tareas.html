@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tareas</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://publisher.linkvertise.com/cdn/linkvertise.js"></script><script>linkvertise(1306833, {whitelist: [], blacklist: [""]});</script>
 </head>
 <body>
     <header>
@@ -17,7 +16,7 @@
     
     <h1>APOYA A LOS COMERCIOS Y EMPRENDEDORES LOCALES</h1>
     
-     <div id="tasks-container">
+    <div id="tasks-container">
         <!-- 🔥 PRUEBA: Enlace agregado manualmente -->
         <div class="task-item">
             <a href="https://www.facebook.com/profile.php?id=61573177982135&locale=es_ES" target="_blank">🔗 Prueba Linkvertise</a>
@@ -27,7 +26,17 @@
     <!-- Firebase y el script de tareas deben ser cargados como módulos -->
     <script type="module" src="tareas.js"></script>
 
-
+    <!-- Esperar a que el DOM esté listo -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const script = document.createElement("script");
+            script.src = "https://publisher.linkvertise.com/cdn/linkvertise.js";
+            script.onload = () => {
+                linkvertise(1306833, { whitelist: [], blacklist: [""] });
+            };
+            document.body.appendChild(script);
+        });
+    </script>
 </body>
 </html>
 
