@@ -55,7 +55,6 @@ async function cargarTareas() {
             if (clientData.enlace) {
                 tasksArray.push({
                     nombre: clientData.nombre,
-                    enlace: clientData.enlace,
                     tqc: clientData.asignedTQC
                 });
             }
