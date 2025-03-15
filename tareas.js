@@ -34,9 +34,9 @@ onAuthStateChanged(auth, async (user) => {
                 // Cargar las tareas
                 await cargarTareas();
 
-                // 🔥 Forzar la re-ejecución de Linkvertise después de cargar los enlaces dinámicos
-                if (window.linkvertise) {
-                    window.linkvertise(1306833, { whitelist: [], blacklist: [""] });
+                // 🔥 Llamar a linkvertise() después de cargar los enlaces dinámicos
+                if (typeof linkvertise === "function") {
+                    linkvertise(1306833, { whitelist: [], blacklist: [""] });
                 }
             }
         } catch (error) {
