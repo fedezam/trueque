@@ -32,7 +32,12 @@ onAuthStateChanged(auth, async (user) => {
                 tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
 
                 // Cargar las tareas
-                cargarTareas();
+                await cargarTareas();
+
+                // 🔥 Forzar la re-ejecución de Linkvertise después de cargar los enlaces dinámicos
+                if (window.linkvertise) {
+                    window.linkvertise(1306833, { whitelist: [], blacklist: [""] });
+                }
             }
         } catch (error) {
             console.error("❌ Error obteniendo datos del usuario:", error);
@@ -75,18 +80,9 @@ async function cargarTareas() {
                 </div>
             `;
         });
-
-        recargarLinkvertise(); // 🔥 Recargar script de Linkvertise
     } catch (error) {
         console.error("❌ Error cargando tareas:", error);
     }
-}
-
-// 🔥 RECARGAR EL SCRIPT DE LINKVERTISE 🔥
-function recargarLinkvertise() {
-    const script = document.createElement("script");
-    script.src = "https://publisher.linkvertise.com/cdn/linkvertise.js";
-    document.body.appendChild(script);
 }
 
 // Verificar la visita al enlace
