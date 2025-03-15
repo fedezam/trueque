@@ -1,17 +1,7 @@
-// Importar Firebase correctamente
+// Importar módulos de Firebase
 import { auth, db } from "./firebase-config.js";
-import { 
-    onAuthStateChanged, 
-    getAuth 
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-
-import { 
-    collection, 
-    doc, 
-    getDoc, 
-    getDocs, 
-    updateDoc 
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { doc, updateDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 // Elementos del DOM
 const welcomeMessage = document.getElementById("welcome-message");
@@ -20,9 +10,11 @@ const tasksContainer = document.getElementById("tasks-container");
 
 // Detectar usuario autenticado
 onAuthStateChanged(auth, async (user) => {
-    if (user) {
+    if (user && user.uid) {
         try {
             console.log("🔍 Usuario autenticado:", user);
+            if (!db) throw new Error("Firestore no está inicializado correctamente.");
+
             const userRef = doc(db, "usuarios", user.uid);
             const userDoc = await getDoc(userRef);
 
@@ -31,20 +23,18 @@ onAuthStateChanged(auth, async (user) => {
                 welcomeMessage.textContent = `Bienvenido, ${userData.nombre || 'Usuario'}`;
                 tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
 
-                // Cargar las tareas
-                await cargarTareas();
-
-                // 🔥 Llamar a linkvertise() después de cargar los enlaces dinámicos
-                if (typeof linkvertise === "function") {
-                    linkvertise(1306833, { whitelist: [], blacklist: [""] });
-                }
+                // Cargar las tareas de la base de datos
+                cargarTareas();
+            } else {
+                console.warn("⚠️ No se encontraron datos del usuario en Firestore.");
             }
         } catch (error) {
             console.error("❌ Error obteniendo datos del usuario:", error);
         }
     } else {
+        console.warn("⚠️ No hay usuario autenticado o falta UID.");
         alert("No has iniciado sesión.");
-        window.location.href = "registro.html";
+        window.location.href = "registro.html"; // Redirige si no hay sesión
     }
 });
 
@@ -54,31 +44,46 @@ async function cargarTareas() {
         const tasksRef = collection(db, "clientes");
         const tasksSnapshot = await getDocs(tasksRef);
 
+        console.log("📂 Documentos obtenidos de 'clientes':", tasksSnapshot.docs.length);
+
         let tasksArray = [];
         tasksSnapshot.forEach((doc) => {
             const clientData = doc.data();
-            if (clientData.enlace) {
+            console.log("📄 Datos del documento:", clientData);
+
+            if (clientData.enlace) { // Verifica que el campo "enlace" exista
                 tasksArray.push({
                     nombre: clientData.nombre,
                     enlace: clientData.enlace,
-                    tqc: clientData.asignedTQC
+                    tqc: clientData.asignedTQC // Usa el campo correcto
                 });
             }
         });
 
-        // Mostrar solo 3 tareas aleatorias
-        tasksArray = tasksArray.sort(() => Math.random() - 0.5).slice(0, 3);
+        console.log("📋 Tareas filtradas:", tasksArray);
 
-        tasksContainer.innerHTML = ""; // Limpiar contenedor antes de agregar nuevas tareas
+        // Mostrar solo 5 tareas aleatorias
+        tasksArray = tasksArray.sort(() => Math.random() - 0.5).slice(0, 5);
 
+        // Mostrar las tareas en la página
         tasksArray.forEach(task => {
-            tasksContainer.innerHTML += `
-                <div class="task-item">
-                    <a href="${task.enlace}" target="_blank" onclick="marcarVisita('${task.nombre}', '${task.tqc}')">
-                        📌 DALE TU APOYO A ${task.nombre}
-                    </a>
-                </div>
-            `;
+            const taskElement = document.createElement("div");
+            taskElement.classList.add("task-item");
+
+            // Crear el enlace
+            const taskLink = document.createElement("a");
+            taskLink.href = task.enlace;
+            taskLink.textContent = `DALE TU APOYO A ESTE COMERCIO: ${task.nombre}`;
+            taskLink.target = "_blank";
+            taskElement.appendChild(taskLink);
+
+            // Agregar un botón para verificar la visita
+            const verifyButton = document.createElement("button");
+            verifyButton.textContent = "Verificar Visita";
+            verifyButton.addEventListener("click", () => verificarVisita(task));
+            taskElement.appendChild(verifyButton);
+
+            tasksContainer.appendChild(taskElement);
         });
     } catch (error) {
         console.error("❌ Error cargando tareas:", error);
@@ -86,22 +91,25 @@ async function cargarTareas() {
 }
 
 // Verificar la visita al enlace
-async function marcarVisita(nombre, tqc) {
+async function verificarVisita(task) {
     try {
-        alert(`¡Visita verificada! Ganaste ${tqc} TqC por apoyar a ${nombre}.`);
+        // Mostrar mensaje de éxito
+        alert(`¡Visita verificada! Ganaste ${task.tqc} TqC por apoyar a ${task.nombre}.`);
 
+        // Actualizar los TqC del usuario en Firestore
         const userRef = doc(db, "usuarios", auth.currentUser.uid);
         const userDoc = await getDoc(userRef);
 
         if (userDoc.exists()) {
             const userData = userDoc.data();
-            const newTqc = (userData.tqc || 0) + tqc;
+            const newTqc = (userData.tqc || 0) + task.tqc; // Sumar la recompensa
 
             await updateDoc(userRef, {
                 tqc: newTqc
             });
 
-            tqcBalance.textContent = `Tienes (${newTqc}) TqC`;
+            console.log(`TqC actualizados: ${newTqc}`);
+            tqcBalance.textContent = `Tienes (${newTqc}) TqC`; // Actualizar el balance en la UI
         }
     } catch (error) {
         console.error("❌ Error verificando la visita:", error);
