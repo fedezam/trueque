@@ -47,7 +47,9 @@ const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono);
 const saveUserToFirestore = async (user, additional = {}) => {
   if (!user) return;
 
-  const userRef = doc(db, "usuarios", user.uid);
+  const tipo = additional.tipo || "usuario";
+  const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
+  const userRef = doc(db, coleccion, user.uid);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
@@ -59,7 +61,7 @@ const saveUserToFirestore = async (user, additional = {}) => {
       nombre: user.displayName || additional.nombre || "Usuario",
       email: user.email,
       telefono: additional.telefono || "",
-      tipo: additional.tipo || "usuario",
+      tipo,
       foto: user.photoURL || "",
       codigoReferido,
       referidoPor,
@@ -68,19 +70,19 @@ const saveUserToFirestore = async (user, additional = {}) => {
       tqc: 0,
     });
 
-    console.log("✅ Usuario guardado en Firestore.");
+    console.log(`✅ Guardado en colección '${coleccion}'.`);
 
     if (referidoPor) {
-      const refSnapshot = await getDoc(doc(db, "usuarios", referidoPor));
+      const refSnapshot = await getDoc(doc(db, coleccion, referidoPor));
       if (refSnapshot.exists()) {
-        await updateDoc(doc(db, "usuarios", referidoPor), {
+        await updateDoc(doc(db, coleccion, referidoPor), {
           referidos: arrayUnion(user.uid),
         });
-        console.log("🔁 Referido agregado al referente");
+        console.log("🔁 Referido agregado");
       }
     }
   } else {
-    console.log("ℹ️ El usuario ya existe en Firestore.");
+    console.log("ℹ️ Ya existe en la colección.");
   }
 };
 
@@ -122,29 +124,15 @@ document.getElementById("register-form").addEventListener("submit", async (e) =>
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const confirm = document.getElementById("confirm-password").value;
-  const telefono = document.getElementById("telefono").value.trim();
+  const telefono = document.getElementById("telefono")?.value.trim() || "";
   const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
   const referidoPor = getCodigoReferidoDesdeURL();
 
-  if (!validarEmail(email)) {
-    return alert("Correo inválido.");
-  }
-
-  if (telefono && !validarTelefono(telefono)) {
-    return alert("Número de teléfono inválido.");
-  }
-
-  if (password !== confirm) {
-    return alert("Las contraseñas no coinciden.");
-  }
-
-  if (!validarPassword(password)) {
-    return alert("La contraseña no cumple con los requisitos.");
-  }
-
-  if (!tipo) {
-    return alert("Debes seleccionar si sos Usuario o Comercio.");
-  }
+  if (!validarEmail(email)) return alert("Correo inválido.");
+  if (telefono && !validarTelefono(telefono)) return alert("Teléfono inválido.");
+  if (password !== confirm) return alert("Las contraseñas no coinciden.");
+  if (!validarPassword(password)) return alert("La contraseña no cumple con los requisitos.");
+  if (!tipo) return alert("Seleccioná Usuario o Comercio.");
 
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -161,15 +149,15 @@ document.getElementById("register-form").addEventListener("submit", async (e) =>
 document.getElementById("recuperar-link").addEventListener("click", async (e) => {
   e.preventDefault();
   const email = prompt("Ingresá tu correo para recuperar tu contraseña:");
-  if (!email || !validarEmail(email)) {
-    return alert("Correo inválido.");
-  }
+  if (!email || !validarEmail(email)) return alert("Correo inválido.");
 
   try {
     await sendPasswordResetEmail(auth, email);
-    alert("Te enviamos un correo con instrucciones para recuperar tu contraseña.");
+    alert("Te enviamos un correo con instrucciones.");
   } catch (error) {
     alert("Error al enviar el correo: " + error.message);
     console.error(error);
   }
 });
+
+
