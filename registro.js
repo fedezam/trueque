@@ -45,17 +45,12 @@ const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono);
 
 // Guardar en Firestore
 const saveUserToFirestore = async (user, additional = {}) => {
-  const tipo = additional.tipo;
-  console.log("Tipo:", tipo); // Agrega este log aquí
-  const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
-  console.log("Colección:", coleccion); // Agrega este log aquí
-  const userRef = doc(db, coleccion, user.uid);
-
-
   if (!user) return;
 
   const tipo = additional.tipo;
+  console.log("Tipo:", tipo); 
   const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
+  console.log("Colección:", coleccion); 
   const userRef = doc(db, coleccion, user.uid);
   const userDoc = await getDoc(userRef);
 
@@ -76,6 +71,22 @@ const saveUserToFirestore = async (user, additional = {}) => {
       creadoEn: serverTimestamp(),
       tqc: 0,
     });
+
+    console.log(`✅ Guardado en colección '${coleccion}'.`);
+
+    if (referidoPor) {
+      const refSnapshot = await getDoc(doc(db, coleccion, referidoPor));
+      if (refSnapshot.exists()) {
+        await updateDoc(doc(db, coleccion, referidoPor), {
+          referidos: arrayUnion(user.uid),
+        });
+        console.log("🔁 Referido agregado");
+      }
+    }
+  } else {
+    console.log("ℹ️ Ya existe en la colección.");
+  }
+};
 
     console.log(`✅ Guardado en colección '${coleccion}'.`);
 
