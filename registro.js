@@ -98,8 +98,16 @@ onAuthStateChanged(auth, async (user) => {
 document.getElementById("google-login").addEventListener("click", async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    await saveUserToFirestore(result.user, {
-      referidoPor: getCodigoReferidoDesdeURL(),
+    const tipoGoogle = document.querySelector('input[name="tipo"]:checked')?.value;
+
+if (!tipoGoogle) {
+  alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
+  return;
+}
+
+await saveUserToFirestore(result.user, {
+  referidoPor: getCodigoReferidoDesdeURL(),
+  tipo: tipoGoogle,
     });
     alert("Inicio de sesión con Google exitoso.");
     window.location.replace("home.html");
