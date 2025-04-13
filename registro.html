@@ -9,18 +9,44 @@
 <body>
   <div class="container">
     <h2>Registro</h2>
+
     <form id="register-form">
       <input type="text" id="nombre" placeholder="Nombre" required>
       <input type="email" id="email" placeholder="Correo electrónico" required>
+
+      <!-- Contraseña y Confirmar -->
       <input type="password" id="password" placeholder="Contraseña" required>
+      <input type="password" id="confirm-password" placeholder="Confirmar Contraseña" required>
+
+      <div id="password-rules">
+        <p>La contraseña debe tener:</p>
+        <ul>
+          <li>Mínimo 6 caracteres</li>
+          <li>Al menos 1 mayúscula</li>
+          <li>Al menos 1 carácter especial (!@#$%...)</li>
+        </ul>
+      </div>
+
+      <!-- Teléfono (opcional) -->
       <input type="tel" id="telefono" placeholder="Teléfono">
+
+      <!-- Tipo de cuenta -->
+      <div>
+        <label><input type="radio" name="tipo" value="usuario" required> Soy Usuario</label>
+        <label><input type="radio" name="tipo" value="comercio" required> Soy Comercio</label>
+      </div>
+
+      <!-- Campo oculto para guardar el referido recibido por URL -->
+      <input type="hidden" id="referidoPor" value="">
+
       <button type="submit">Registrarse</button>
     </form>
-    
+
+    <hr>
+
     <button id="google-login">Iniciar sesión con Google</button>
   </div>
 
-  <!-- 🔹 Aquí cargamos el script como módulo -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
