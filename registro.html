@@ -1,70 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Registro</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
     <h2>Registro</h2>
 
     <form id="register-form">
-      <!-- Nombre -->
-      <input type="text" id="nombre" placeholder="Nombre" required>
-      <div class="error-message" id="error-nombre"></div>
+      <input type="text" id="nombre" placeholder="Nombre" required />
+      <input type="email" id="email" placeholder="Correo electrónico" required />
 
-      <!-- Email -->
-      <input type="email" id="email" placeholder="Correo electrónico" required>
-      <div class="error-message" id="error-email"></div>
+      <input type="password" id="password" placeholder="Contraseña" required />
+      <input type="password" id="confirm-password" placeholder="Confirmar Contraseña" required />
 
-      <!-- Contraseña -->
-      <div class="password-container">
-        <input type="password" id="password" placeholder="Contraseña" required>
-        <span class="toggle-password" data-target="password">👁️</span>
-      </div>
-      <div class="error-message" id="error-password"></div>
+      <label class="toggle-pass">
+        <input type="checkbox" id="mostrar-contrasena" /> Mostrar contraseña
+      </label>
 
-      <!-- Confirmar contraseña -->
-      <div class="password-container">
-        <input type="password" id="confirm-password" placeholder="Confirmar Contraseña" required>
-        <span class="toggle-password" data-target="confirm-password">👁️</span>
-      </div>
-      <div class="error-message" id="error-confirm-password"></div>
-
-      <!-- Reglas de contraseña -->
       <div id="password-rules">
         <p>La contraseña debe tener:</p>
         <ul>
           <li>Mínimo 6 caracteres</li>
           <li>Al menos 1 mayúscula</li>
-          <li>Al menos 1 carácter especial (!@#$%...)</li>
+          <li>Al menos 1 carácter especial (!@#$%)</li>
         </ul>
       </div>
 
-      <!-- Teléfono separado -->
-      <div class="telefono-container">
-        <input type="text" id="codigo-area" placeholder="Código de área" required pattern="[0-9]+" maxlength="5">
-        <input type="text" id="numero" placeholder="Número" required pattern="[0-9]+" maxlength="15">
+      <input type="tel" id="telefono" placeholder="Teléfono (opcional)" />
+
+      <div class="tipo-cuenta">
+        <label><input type="radio" name="tipo" value="usuario" required /> Soy Usuario</label>
+        <label><input type="radio" name="tipo" value="comercio" required /> Soy Comercio</label>
       </div>
-      <div class="error-message" id="error-telefono"></div>
 
-      <!-- Tipo de cuenta -->
-      <div>
-        <label><input type="radio" name="tipo" value="usuario" required> Soy Usuario</label>
-        <label><input type="radio" name="tipo" value="comercio" required> Soy Comercio</label>
-      </div>
-      <div class="error-message" id="error-tipo"></div>
+      <input type="hidden" id="referidoPor" value="" />
 
-      <!-- Campo oculto para referido -->
-      <input type="hidden" id="referidoPor" value="">
-
-      <!-- Botón registrar -->
       <button type="submit">Registrarse</button>
+
+      <p class="forgot">
+        <a href="#" id="recuperar-link">¿Olvidaste tu contraseña?</a>
+      </p>
     </form>
 
-    <hr>
+    <hr />
 
     <button id="google-login">Iniciar sesión con Google</button>
   </div>
@@ -72,4 +54,3 @@
   <script type="module" src="registro.js"></script>
 </body>
 </html>
-
