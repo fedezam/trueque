@@ -1,9 +1,9 @@
 import { auth, db, googleProvider } from "./firebase-config.js";
 import {
-  getAuth,
   signInWithPopup,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 import {
   doc,
@@ -14,82 +14,85 @@ import {
   arrayUnion
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-// 📌 Utilidad: generar código único de referido
+// Generar código de referido
 const generarCodigoReferido = () => {
-  const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let codigo = "";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
   for (let i = 0; i < 6; i++) {
-    codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return codigo;
+  return code;
 };
 
-// 📌 Obtener código de referido desde URL (?ref=ABC123)
+// Obtener código de referido desde la URL
 const getCodigoReferidoDesdeURL = () => {
   const params = new URLSearchParams(window.location.search);
   return params.get("ref") || null;
 };
 
-// 📌 Función para guardar el usuario en Firestore
-const saveUserToFirestore = async (user, additionalData = {}) => {
+// Validaciones
+const validarPassword = (pass) => {
+  return (
+    pass.length >= 6 &&
+    /[A-Z]/.test(pass) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(pass)
+  );
+};
+
+const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono);
+
+// Guardar en Firestore
+const saveUserToFirestore = async (user, additional = {}) => {
   if (!user) return;
 
-  try {
-    const userRef = doc(db, "usuarios", user.uid);
-    const userDoc = await getDoc(userRef);
+  const userRef = doc(db, "usuarios", user.uid);
+  const userDoc = await getDoc(userRef);
 
-    if (!userDoc.exists()) {
-      const codigoReferido = generarCodigoReferido();
-      const referidoPor = additionalData.referidoPor || null;
+  if (!userDoc.exists()) {
+    const codigoReferido = generarCodigoReferido();
+    const referidoPor = additional.referidoPor || null;
 
-      await setDoc(userRef, {
-        uid: user.uid,
-        nombre: user.displayName || additionalData.nombre || "Usuario",
-        email: user.email,
-        telefono: additionalData.telefono || "",
-        tipo: additionalData.tipo || "usuario",
-        foto: user.photoURL || "",
-        codigoReferido,
-        referidoPor,
-        referidos: [],
-        creadoEn: serverTimestamp(),
-        tqc: 0,
-      });
+    await setDoc(userRef, {
+      uid: user.uid,
+      nombre: user.displayName || additional.nombre || "Usuario",
+      email: user.email,
+      telefono: additional.telefono || "",
+      tipo: additional.tipo || "usuario",
+      foto: user.photoURL || "",
+      codigoReferido,
+      referidoPor,
+      referidos: [],
+      creadoEn: serverTimestamp(),
+      tqc: 0,
+    });
 
-      console.log("✅ Usuario guardado en Firestore.");
+    console.log("✅ Usuario guardado en Firestore.");
 
-      // Si fue referido por otro, actualizamos al que refirió
-      if (referidoPor) {
-        const refSnapshot = await getDoc(doc(db, "usuarios", referidoPor));
-        if (refSnapshot.exists()) {
-          await updateDoc(doc(db, "usuarios", referidoPor), {
-            referidos: arrayUnion(user.uid),
-          });
-          console.log("🔁 Referido agregado al referente");
-        }
+    if (referidoPor) {
+      const refSnapshot = await getDoc(doc(db, "usuarios", referidoPor));
+      if (refSnapshot.exists()) {
+        await updateDoc(doc(db, "usuarios", referidoPor), {
+          referidos: arrayUnion(user.uid),
+        });
+        console.log("🔁 Referido agregado al referente");
       }
-    } else {
-      console.log("ℹ️ El usuario ya existe en Firestore.");
     }
-  } catch (error) {
-    console.error("❌ Error al guardar en Firestore:", error);
+  } else {
+    console.log("ℹ️ El usuario ya existe en Firestore.");
   }
 };
 
-// 📌 Detectar si el usuario ya está autenticado
+// Usuario ya autenticado
 onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    console.log("✅ Usuario autenticado:", user);
+  if (user && window.location.pathname.includes("registro.html")) {
     await saveUserToFirestore(user);
-    if (window.location.pathname.includes("registro.html")) {
-      window.location.replace("home.html");
-    }
-  } else {
-    console.log("⚠️ No hay usuario autenticado.");
+    window.location.replace("home.html");
   }
 });
 
-// 📌 Registro con Google
+// Registro con Google
 document.getElementById("google-login").addEventListener("click", async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -99,60 +102,74 @@ document.getElementById("google-login").addEventListener("click", async () => {
     alert("Inicio de sesión con Google exitoso.");
     window.location.replace("home.html");
   } catch (error) {
-    console.error("❌ Error con Google:", error);
-    alert("Error: " + error.message);
+    alert("Error con Google: " + error.message);
+    console.error(error);
   }
 });
 
-// 📌 Validación de contraseña
-const validarPassword = (pass) => {
-  const minLength = pass.length >= 6;
-  const tieneMayus = /[A-Z]/.test(pass);
-  const tieneEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-  return minLength && tieneMayus && tieneEspecial;
-};
+// Mostrar/ocultar contraseña
+document.getElementById("mostrar-contrasena").addEventListener("change", (e) => {
+  const show = e.target.checked;
+  document.getElementById("password").type = show ? "text" : "password";
+  document.getElementById("confirm-password").type = show ? "text" : "password";
+});
 
-// 📌 Registro manual
-document.getElementById("register-form").addEventListener("submit", async (event) => {
-  event.preventDefault();
+// Registro manual
+document.getElementById("register-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
   const nombre = document.getElementById("nombre").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-  const confirmPassword = document.getElementById("confirm-password").value;
+  const confirm = document.getElementById("confirm-password").value;
   const telefono = document.getElementById("telefono").value.trim();
   const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
   const referidoPor = getCodigoReferidoDesdeURL();
 
-  // Validaciones
-  if (password !== confirmPassword) {
-    alert("Las contraseñas no coinciden.");
-    return;
+  if (!validarEmail(email)) {
+    return alert("Correo inválido.");
+  }
+
+  if (telefono && !validarTelefono(telefono)) {
+    return alert("Número de teléfono inválido.");
+  }
+
+  if (password !== confirm) {
+    return alert("Las contraseñas no coinciden.");
   }
 
   if (!validarPassword(password)) {
-    alert("La contraseña no cumple con los requisitos.");
-    return;
+    return alert("La contraseña no cumple con los requisitos.");
   }
 
   if (!tipo) {
-    alert("Debes seleccionar si sos Usuario o Comercio.");
-    return;
+    return alert("Debes seleccionar si sos Usuario o Comercio.");
   }
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await saveUserToFirestore(userCredential.user, {
-      nombre,
-      telefono,
-      tipo,
-      referidoPor,
-    });
-
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await saveUserToFirestore(cred.user, { nombre, telefono, tipo, referidoPor });
     alert("Registro exitoso.");
     window.location.replace("home.html");
   } catch (error) {
-    console.error("❌ Error en el registro:", error);
-    alert("Error: " + error.message);
+    alert("Error en el registro: " + error.message);
+    console.error(error);
+  }
+});
+
+// Recuperar contraseña
+document.getElementById("recuperar-link").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const email = prompt("Ingresá tu correo para recuperar tu contraseña:");
+  if (!email || !validarEmail(email)) {
+    return alert("Correo inválido.");
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert("Te enviamos un correo con instrucciones para recuperar tu contraseña.");
+  } catch (error) {
+    alert("Error al enviar el correo: " + error.message);
+    console.error(error);
   }
 });
