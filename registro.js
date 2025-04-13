@@ -1,7 +1,9 @@
+
 import { auth, db, googleProvider } from "./firebase-config.js";
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 import {
@@ -10,7 +12,7 @@ import {
   setDoc,
   updateDoc,
   serverTimestamp,
-  arrayUnion,
+  arrayUnion
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 // Generar código de referido
@@ -30,13 +32,15 @@ const getCodigoReferidoDesdeURL = () => {
 };
 
 // Validaciones
-const validarPassword = (pass) =>
-  pass.length >= 6 &&
-  /[A-Z]/.test(pass) &&
-  /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+const validarPassword = (pass) => {
+  return (
+    pass.length >= 6 &&
+    /[A-Z]/.test(pass) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(pass)
+  );
+};
 
 const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
 const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono);
 
 // Guardar en Firestore
@@ -68,7 +72,6 @@ const saveUserToFirestore = async (user, additional = {}) => {
 
     console.log(`✅ Guardado en colección '${coleccion}'.`);
 
-    // Agregar al referido, buscando en ambas colecciones
     if (referidoPor) {
       let refSnapshot = await getDoc(doc(db, "usuarios", referidoPor));
       let refColeccion = "usuarios";
@@ -91,6 +94,18 @@ const saveUserToFirestore = async (user, additional = {}) => {
     console.log("ℹ️ Ya existe en la colección.");
   }
 };
+
+// Usuario ya autenticado
+onAuthStateChanged(auth, async (user) => {
+  if (user && window.location.pathname.includes("registro.html")) {
+    const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
+    await saveUserToFirestore(user, {
+      referidoPor: getCodigoReferidoDesdeURL(),
+      tipo,
+    });
+    // window.location.replace("home.html");
+  }
+});
 
 // Registro con Google
 document.getElementById("google-login").addEventListener("click", async () => {
