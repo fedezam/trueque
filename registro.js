@@ -1,4 +1,3 @@
-
 import { auth, db, googleProvider } from "./firebase-config.js";
 import {
   signInWithPopup,
@@ -31,12 +30,6 @@ const getCodigoReferidoDesdeURL = () => {
   return params.get("ref") || null;
 };
 
-// Obtener tipo desde la URL
-const getTipoDesdeURL = () => {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("tipo") || "usuario";
-};
-
 // Validaciones
 const validarPassword = (pass) => {
   return (
@@ -54,7 +47,7 @@ const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono);
 const saveUserToFirestore = async (user, additional = {}) => {
   if (!user) return;
 
-  const tipo = additional.tipo || "usuario";
+  const tipo = additional.tipo;
   const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
   const userRef = doc(db, coleccion, user.uid);
   const userDoc = await getDoc(userRef);
@@ -96,9 +89,10 @@ const saveUserToFirestore = async (user, additional = {}) => {
 // Usuario ya autenticado
 onAuthStateChanged(auth, async (user) => {
   if (user && window.location.pathname.includes("registro.html")) {
+    const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
     await saveUserToFirestore(user, {
       referidoPor: getCodigoReferidoDesdeURL(),
-      tipo: getTipoDesdeURL(),
+      tipo,
     });
     window.location.replace("home.html");
   }
@@ -106,15 +100,15 @@ onAuthStateChanged(auth, async (user) => {
 
 // Registro con Google
 document.getElementById("google-login").addEventListener("click", async () => {
+  const tipoGoogle = document.querySelector('input[name="tipo"]:checked')?.value;
+
+  if (!tipoGoogle) {
+    alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
+    return;
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    const tipoGoogle = document.querySelector('input[name="tipo"]:checked')?.value;
-
-    if (!tipoGoogle) {
-      alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
-      return;
-    }
-
     await saveUserToFirestore(result.user, {
       referidoPor: getCodigoReferidoDesdeURL(),
       tipo: tipoGoogle,
@@ -177,4 +171,3 @@ document.getElementById("recuperar-link").addEventListener("click", async (e) =>
     console.error(error);
   }
 });
-
