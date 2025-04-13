@@ -51,7 +51,7 @@ const saveUserToFirestore = async (user, additional = {}) => {
   console.log("Colección:", coleccion); // Agrega este log aquí
   const userRef = doc(db, coleccion, user.uid);
 
-}
+
   if (!user) return;
 
   const tipo = additional.tipo;
