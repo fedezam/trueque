@@ -1,3 +1,4 @@
+
 import { auth, db, googleProvider } from "./firebase-config.js";
 import {
   signInWithPopup,
@@ -28,6 +29,12 @@ const generarCodigoReferido = () => {
 const getCodigoReferidoDesdeURL = () => {
   const params = new URLSearchParams(window.location.search);
   return params.get("ref") || null;
+};
+
+// Obtener tipo desde la URL
+const getTipoDesdeURL = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("tipo") || "usuario";
 };
 
 // Validaciones
@@ -89,7 +96,10 @@ const saveUserToFirestore = async (user, additional = {}) => {
 // Usuario ya autenticado
 onAuthStateChanged(auth, async (user) => {
   if (user && window.location.pathname.includes("registro.html")) {
-    await saveUserToFirestore(user);
+    await saveUserToFirestore(user, {
+      referidoPor: getCodigoReferidoDesdeURL(),
+      tipo: getTipoDesdeURL(),
+    });
     window.location.replace("home.html");
   }
 });
@@ -100,14 +110,14 @@ document.getElementById("google-login").addEventListener("click", async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const tipoGoogle = document.querySelector('input[name="tipo"]:checked')?.value;
 
-if (!tipoGoogle) {
-  alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
-  return;
-}
+    if (!tipoGoogle) {
+      alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
+      return;
+    }
 
-await saveUserToFirestore(result.user, {
-  referidoPor: getCodigoReferidoDesdeURL(),
-  tipo: tipoGoogle,
+    await saveUserToFirestore(result.user, {
+      referidoPor: getCodigoReferidoDesdeURL(),
+      tipo: tipoGoogle,
     });
     alert("Inicio de sesión con Google exitoso.");
     window.location.replace("home.html");
@@ -167,5 +177,4 @@ document.getElementById("recuperar-link").addEventListener("click", async (e) =>
     console.error(error);
   }
 });
-
 
