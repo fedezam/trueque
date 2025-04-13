@@ -45,6 +45,14 @@ const validarTelefono = (telefono) => /^\d{8,15}$/.test(telefono);
 
 // Guardar en Firestore
 const saveUserToFirestore = async (user, additional = {}) => {
+  const tipo = additional.tipo;
+  console.log("Tipo:", tipo); // Agrega este log aquí
+  const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
+  console.log("Colección:", coleccion); // Agrega este log aquí
+  const userRef = doc(db, coleccion, user.uid);
+
+  // ...
+}
   if (!user) return;
 
   const tipo = additional.tipo;
