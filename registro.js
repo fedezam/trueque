@@ -94,7 +94,7 @@ onAuthStateChanged(auth, async (user) => {
       referidoPor: getCodigoReferidoDesdeURL(),
       tipo,
     });
-    window.location.replace("home.html");
+    //window.location.replace("home.html");
   }
 });
 
