@@ -2,51 +2,63 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - Comercio</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
     <h1>Bienvenido, Comercio</h1>
-    <p>Este es tu dashboard. Aquí puedes gestionar tus productos y ventas.</p>
+    <p>Este es tu panel de control. Aquí podrás gestionar tu cuenta y tus productos.</p>
     
     <div>
       <h2>Mi Cuenta</h2>
-      <p>Nombre del Comercio: <span id="comercio-name">Comercio XYZ</span></p>
-      <p>Email: <span id="comercio-email">comercio.xyz@example.com</span></p>
-      <p>Teléfono: <span id="comercio-phone">+123456789</span></p>
-    </div>
-
-    <div>
-      <h2>Inventario de Productos</h2>
-      <ul>
-        <li>Producto 1: Camiseta - Stock: 100</li>
-        <li>Producto 2: Pantalón - Stock: 50</li>
-        <li>Producto 3: Zapatos - Stock: 30</li>
-      </ul>
-    </div>
-
-    <div>
-      <h2>Ventas Recientes</h2>
-      <ul>
-        <li>Venta 1: Producto A - $100</li>
-        <li>Venta 2: Producto B - $50</li>
-        <li>Venta 3: Producto C - $75</li>
-      </ul>
+      <p>Nombre: <span id="nombre"></span></p>
+      <p>Email: <span id="email"></span></p>
+      <p>Teléfono: <span id="telefono"></span></p>
     </div>
 
     <button onclick="logout()">Cerrar sesión</button>
   </div>
 
-  <script>
-    // Aquí podrías agregar funcionalidad JS para mostrar los datos del comercio desde Firestore
-    function logout() {
-      // Aquí se agregaría el código para cerrar sesión
-      alert('Cerrando sesión...');
-      window.location.href = 'login.html';  // Redirigir al login
-    }
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
+
+    const nombreSpan = document.getElementById('nombre');
+    const emailSpan = document.getElementById('email');
+    const telefonoSpan = document.getElementById('telefono');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+
+        try {
+          const docRef = doc(db, 'comercios', uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            nombreSpan.textContent = data.nombre || '(Sin nombre)';
+            emailSpan.textContent = data.email || '(Sin email)';
+            telefonoSpan.textContent = data.telefono || '(Sin teléfono)';
+          } else {
+            alert('No se encontraron datos del comercio.');
+          }
+        } catch (err) {
+          console.error('Error al obtener los datos:', err);
+        }
+      } else {
+        window.location.href = 'registr.html'; // Redirige si no hay sesión
+      }
+    });
+
+    window.logout = async function () {
+      await signOut(auth);
+      window.location.href = 'registr.html';
+    };
   </script>
 </body>
 </html>
+
