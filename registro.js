@@ -83,7 +83,13 @@ form.addEventListener('submit', async (e) => {
     });
 
     alert('Registro exitoso.');
-    window.location.href = 'inicio.html';
+    
+    // Redirigimos a la página adecuada según el tipo de cuenta
+    if (tipo === 'usuario') {
+      window.location.href = 'dashboard-usuario.html';
+    } else if (tipo === 'comercio') {
+      window.location.href = 'dashboard-comercio.html';
+    }
 
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -124,7 +130,13 @@ googleLoginBtn.addEventListener('click', async () => {
     }
 
     alert('Sesión iniciada con Google.');
-    window.location.href = 'inicio.html';
+
+    // Redirigimos a la página adecuada según el tipo de cuenta
+    if (tipo === 'usuario') {
+      window.location.href = 'dashboard-usuario.html';
+    } else if (tipo === 'comercio') {
+      window.location.href = 'dashboard-comercio.html';
+    }
 
   } catch (error) {
     console.error(error);
