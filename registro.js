@@ -2,6 +2,7 @@ import { auth, db, googleProvider } from "./firebase-config.js";
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 import {
@@ -23,13 +24,11 @@ const generarCodigoReferido = () => {
   return code;
 };
 
-// Obtener código de referido desde la URL
 const getCodigoReferidoDesdeURL = () => {
   const params = new URLSearchParams(window.location.search);
   return params.get("ref") || null;
 };
 
-// Validaciones
 const validarPassword = (pass) => {
   return (
     pass.length >= 6 &&
@@ -46,10 +45,7 @@ const saveUserToFirestore = async (user, additional = {}) => {
   if (!user) return;
 
   const tipo = additional.tipo;
-  if (!tipo) {
-    console.warn("⚠️ Tipo de usuario no definido al guardar en Firestore.");
-    return;
-  }
+  if (!tipo) throw new Error("Tipo de usuario no definido");
 
   const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
   const userRef = doc(db, coleccion, user.uid);
@@ -98,36 +94,6 @@ const saveUserToFirestore = async (user, additional = {}) => {
   }
 };
 
-// Registro con Google
-document.getElementById("google-login").addEventListener("click", async () => {
-  const tipoGoogle = document.querySelector('input[name="tipo"]:checked')?.value;
-
-  if (!tipoGoogle) {
-    alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
-    return;
-  }
-
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    await saveUserToFirestore(result.user, {
-      referidoPor: getCodigoReferidoDesdeURL(),
-      tipo: tipoGoogle,
-    });
-    alert("Inicio de sesión con Google exitoso.");
-    window.location.replace("home.html");
-  } catch (error) {
-    alert("Error con Google: " + error.message);
-    console.error(error);
-  }
-});
-
-// Mostrar/ocultar contraseña
-document.getElementById("mostrar-contrasena").addEventListener("change", (e) => {
-  const show = e.target.checked;
-  document.getElementById("password").type = show ? "text" : "password";
-  document.getElementById("confirm-password").type = show ? "text" : "password";
-});
-
 // Registro manual
 document.getElementById("register-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -157,6 +123,43 @@ document.getElementById("register-form").addEventListener("submit", async (e) =>
   }
 });
 
+// Registro con Google
+document.getElementById("google-login").addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
+
+  if (!tipo || (tipo !== "usuario" && tipo !== "comercio")) {
+    alert("Seleccioná si sos Usuario o Comercio antes de continuar con Google.");
+    return;
+  }
+
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const telefono = document.getElementById("telefono")?.value.trim() || "";
+    const referidoPor = getCodigoReferidoDesdeURL();
+
+    await saveUserToFirestore(result.user, {
+      tipo,
+      telefono,
+      referidoPor,
+    });
+
+    alert("Inicio de sesión con Google exitoso.");
+    window.location.replace("home.html");
+  } catch (error) {
+    alert("Error con Google: " + error.message);
+    console.error(error);
+  }
+});
+
+// Mostrar/ocultar contraseña
+document.getElementById("mostrar-contrasena").addEventListener("change", (e) => {
+  const show = e.target.checked;
+  document.getElementById("password").type = show ? "text" : "password";
+  document.getElementById("confirm-password").type = show ? "text" : "password";
+});
+
 // Recuperar contraseña
 document.getElementById("recuperar-link").addEventListener("click", async (e) => {
   e.preventDefault();
@@ -169,5 +172,17 @@ document.getElementById("recuperar-link").addEventListener("click", async (e) =>
   } catch (error) {
     alert("Error al enviar el correo: " + error.message);
     console.error(error);
+  }
+});
+
+// Usuario ya autenticado (por si recarga)
+onAuthStateChanged(auth, async (user) => {
+  if (user && window.location.pathname.includes("registro.html")) {
+    const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
+    if (!tipo) return;
+    await saveUserToFirestore(user, {
+      referidoPor: getCodigoReferidoDesdeURL(),
+      tipo,
+    });
   }
 });
