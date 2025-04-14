@@ -1,9 +1,7 @@
-
 import { auth, db, googleProvider } from "./firebase-config.js";
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
   sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 import {
@@ -48,6 +46,11 @@ const saveUserToFirestore = async (user, additional = {}) => {
   if (!user) return;
 
   const tipo = additional.tipo;
+  if (!tipo) {
+    console.warn("⚠️ Tipo de usuario no definido al guardar en Firestore.");
+    return;
+  }
+
   const coleccion = tipo === "comercio" ? "comercios" : "usuarios";
   const userRef = doc(db, coleccion, user.uid);
   const userDoc = await getDoc(userRef);
@@ -94,18 +97,6 @@ const saveUserToFirestore = async (user, additional = {}) => {
     console.log("ℹ️ Ya existe en la colección.");
   }
 };
-
-// Usuario ya autenticado
-onAuthStateChanged(auth, async (user) => {
-  if (user && window.location.pathname.includes("registro.html")) {
-    const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
-    await saveUserToFirestore(user, {
-      referidoPor: getCodigoReferidoDesdeURL(),
-      tipo,
-    });
-    // window.location.replace("home.html");
-  }
-});
 
 // Registro con Google
 document.getElementById("google-login").addEventListener("click", async () => {
