@@ -1,4 +1,3 @@
-
 import { auth, db, googleProvider } from './firebase-config.js';
 import {
   createUserWithEmailAndPassword,
@@ -79,17 +78,12 @@ form.addEventListener('submit', async (e) => {
       tipo,
       uid: user.uid,
       registradoCon: 'formulario',
-      creadoEn: new Date().toISOString()
+      creadoEn: new Date().toISOString(),
+      completadoPerfil: false
     });
 
     alert('Registro exitoso.');
-    
-    // Redirigimos a la página adecuada según el tipo de cuenta
-    if (tipo === 'usuario') {
-      window.location.href = 'dashboard-usuario.html';
-    } else if (tipo === 'comercio') {
-      window.location.href = 'dashboard-comercio.html';
-    }
+    window.location.href = 'completar-perfil.html';
 
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -125,21 +119,17 @@ googleLoginBtn.addEventListener('click', async () => {
         tipo,
         uid: user.uid,
         registradoCon: 'google',
-        creadoEn: new Date().toISOString()
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
       });
     }
 
     alert('Sesión iniciada con Google.');
-
-    // Redirigimos a la página adecuada según el tipo de cuenta
-    if (tipo === 'usuario') {
-      window.location.href = 'dashboard-usuario.html';
-    } else if (tipo === 'comercio') {
-      window.location.href = 'dashboard-comercio.html';
-    }
+    window.location.href = 'completar-perfil.html';
 
   } catch (error) {
     console.error(error);
     alert('Error al iniciar sesión con Google.');
   }
 });
+
