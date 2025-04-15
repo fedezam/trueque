@@ -11,8 +11,12 @@
   <h1>Completar Perfil</h1>
 
   <form id="completar-perfil-form">
-    <label for="nombre">Nombre completo</label>
+    <label for="nombre">Nombre </label>
     <input type="text" id="nombre" required>
+
+    <label for="apellido">Apellido</label>
+    <input type="text" id="apellido" required>
+
 
     <label for="telefono">Teléfono</label>
     <input type="tel" id="telefono" required>
@@ -34,8 +38,7 @@
     <label for="localidad">Localidad</label>
     <select id="localidad" required></select>
 
-    <label for="redes-sociales">Redes Sociales</label>
-    <input type="text" id="redes-sociales" placeholder="@tucuenta">
+    
 
     <label for="formacion-academica">Formación Académica</label>
     <select id="formacion-academica">
@@ -57,6 +60,23 @@
       <option value="jubilado">Jubilado</option>
       <option value="estudiante">Estudiante</option>
     </select>
+
+    <label for="ecivil">Estado Civil</label>
+    <select id="ecivil" required>
+      <option value="">Seleccioná una opción</option>
+      <option value="soltero">Soltero</option>
+      <option value="casado">Casado</option>
+      <option value="divorciado">Divorciado</option>
+      <option value="en_pareja">En pareja</option>
+    </select>
+
+    <label for="hijos">¿Tenés hijos?</label>
+    <select id="hijos" required>
+      <option value="">Seleccioná una opción</option>
+      <option value="si">Sí</option>
+      <option value="no">No</option>
+    </select>
+
 
     <button type="submit">Guardar perfil</button>
   </form>
