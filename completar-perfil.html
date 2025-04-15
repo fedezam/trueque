@@ -1,56 +1,128 @@
-<form id="completar-perfil-form">
-  <label for="perfil">¿Qué tipo de perfil querés crear?</label>
-  <select id="perfil" required>
-    <option value="">Seleccioná una opción</option>
-    <option value="usuario">Soy usuario</option>
-    <option value="comercio">Soy comercio</option>
-  </select>
 
-  <label for="localidad">Localidad</label>
-  <input type="text" id="localidad" required>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completar Perfil</title>
+  <link rel="stylesheet" href="estilos.css"> <!-- Cambialo si tu CSS tiene otro nombre -->
+</head>
+<body>
 
-  <label for="provincia">Provincia</label>
-  <input type="text" id="provincia" required>
+  <h1>Completar perfil</h1>
 
-  <label for="telefono">Teléfono</label>
-  <input type="tel" id="telefono" required>
+  <form id="completar-perfil-form">
+    <label for="perfil">¿Qué tipo de perfil querés crear?</label>
+    <select id="perfil" required>
+      <option value="">Seleccioná una opción</option>
+      <option value="usuario">Soy usuario</option>
+      <option value="comercio">Soy comercio</option>
+    </select>
 
-  <label for="redes-sociales">Redes Sociales</label>
-  <input type="text" id="redes-sociales" placeholder="@tucuenta">
+    <label for="provincia">Provincia</label>
+    <select id="provincia" required>
+      <option value="">Seleccioná una provincia</option>
+    </select>
 
-  <label for="formacion-academica">Formación Académica</label>
-  <select id="formacion-academica">
-    <option value="">Seleccioná una opción</option>
-    <option value="no tiene estudios">No tiene estudios</option>
-    <option value="primaria">Primaria</option>
-    <option value="secundaria">Secundaria</option>
-    <option value="terciaria">Terciaria</option>
-    <option value="universitaria">Universitaria</option>
-  </select>
+    <label for="localidad">Localidad</label>
+    <select id="localidad" required>
+      <option value="">Seleccioná una localidad</option>
+    </select>
 
-  <label for="trabajo">Situación Laboral</label>
-  <select id="trabajo">
-    <option value="">Seleccioná una opción</option>
-    <option value="desempleado">Desempleado</option>
-    <option value="empleado">Empleado</option>
-    <option value="independiente">Trabajador independiente</option>
-    <option value="comerciante">Comerciante</option>
-    <option value="jubilado">Jubilado</option>
-    <option value="estudiante">Estudiante</option>
-  </select>
+    <label for="telefono">Teléfono</label>
+    <input type="tel" id="telefono" required>
 
-  <label for="edad">Edad</label>
-  <select id="edad">
-    <option value="">Seleccioná tu edad</option>
-    <!-- Podés ajustar el rango como prefieras -->
-    <option value="-18">Menos de 18</option>
-    <option value="18-25">18 a 25</option>
-    <option value="26-35">26 a 35</option>
-    <option value="36-45">36 a 45</option>
-    <option value="46-60">46 a 60</option>
-    <option value="60+">Más de 60</option>
-  </select>
+    <label for="redes-sociales">Redes Sociales</label>
+    <input type="text" id="redes-sociales" placeholder="@tucuenta">
 
-  <button type="submit">Guardar perfil</button>
-</form>
+    <label for="formacion-academica">Formación Académica</label>
+    <select id="formacion-academica">
+      <option value="">Seleccioná una opción</option>
+      <option value="no tiene estudios">No tiene estudios</option>
+      <option value="primaria">Primaria</option>
+      <option value="secundaria">Secundaria</option>
+      <option value="terciaria">Terciaria</option>
+      <option value="universitaria">Universitaria</option>
+    </select>
 
+    <label for="trabajo">Situación Laboral</label>
+    <select id="trabajo">
+      <option value="">Seleccioná una opción</option>
+      <option value="desempleado">Desempleado</option>
+      <option value="empleado">Empleado</option>
+      <option value="independiente">Trabajador independiente</option>
+      <option value="comerciante">Comerciante</option>
+      <option value="jubilado">Jubilado</option>
+      <option value="estudiante">Estudiante</option>
+    </select>
+
+    <label for="edad">Edad</label>
+    <select id="edad">
+      <option value="">Seleccioná tu edad</option>
+      <option value="-18">Menos de 18</option>
+      <option value="18-25">18 a 25</option>
+      <option value="26-35">26 a 35</option>
+      <option value="36-45">36 a 45</option>
+      <option value="46-60">46 a 60</option>
+      <option value="60+">Más de 60</option>
+    </select>
+
+    <button type="submit">Guardar perfil</button>
+  </form>
+
+  <script type="module">
+    const provinciaSelect = document.getElementById('provincia');
+    const localidadSelect = document.getElementById('localidad');
+
+    let localidadesPorProvincia = {};
+
+    async function cargarDatosDesdeINDEC() {
+      try {
+        const response = await fetch('localidades.json'); // Asegurate que el archivo esté en la misma carpeta
+        const data = await response.json();
+
+        // Agrupar localidades por provincia
+        data.localidades_censales.forEach(loc => {
+          const provinciaNombre = loc.provincia.nombre;
+          const localidadNombre = loc.nombre;
+
+          if (!localidadesPorProvincia[provinciaNombre]) {
+            localidadesPorProvincia[provinciaNombre] = [];
+          }
+
+          localidadesPorProvincia[provinciaNombre].push(localidadNombre);
+        });
+
+        // Poblar el select de provincias
+        Object.keys(localidadesPorProvincia).sort().forEach(nombreProv => {
+          const option = document.createElement('option');
+          option.value = nombreProv;
+          option.textContent = nombreProv;
+          provinciaSelect.appendChild(option);
+        });
+
+        // Evento: al cambiar la provincia, actualizamos el select de localidades
+        provinciaSelect.addEventListener('change', () => {
+          const provSeleccionada = provinciaSelect.value;
+          const localidades = localidadesPorProvincia[provSeleccionada] || [];
+
+          localidadSelect.innerHTML = '<option value="">Seleccioná una localidad</option>';
+          localidades.sort().forEach(nombreLoc => {
+            const option = document.createElement('option');
+            option.value = nombreLoc;
+            option.textContent = nombreLoc;
+            localidadSelect.appendChild(option);
+          });
+        });
+
+      } catch (error) {
+        console.error('Error al cargar localidades:', error);
+        alert('No se pudo cargar el listado de localidades.');
+      }
+    }
+
+    cargarDatosDesdeINDEC();
+  </script>
+
+</body>
+</html>
