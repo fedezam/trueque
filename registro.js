@@ -27,19 +27,6 @@ const validarPassword = (password) => {
   return password.length >= 6 && tieneMayuscula && tieneEspecial;
 };
 
-// Obtener el tipo de cuenta seleccionado (usuario o comercio)
-const obtenerTipoCuenta = () => {
-  const tipo = document.querySelector('input[name="tipo"]:checked');
-  return tipo ? tipo.value : null;
-};
-
-// Verifica si un usuario ya existe en Firestore
-const existeUsuario = async (tipo, uid) => {
-  const docRef = doc(db, `${tipo}s`, uid);
-  const docSnap = await getDoc(docRef);
-  return docSnap.exists();
-};
-
 // Registro con formulario
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -49,12 +36,6 @@ form.addEventListener('submit', async (e) => {
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirm-password').value;
   const telefono = document.getElementById('telefono').value.trim();
-  const tipo = obtenerTipoCuenta();
-
-  if (!tipo) {
-    alert('Por favor, seleccioná si sos Usuario o Comercio.');
-    return;
-  }
 
   if (password !== confirmPassword) {
     alert('Las contraseñas no coinciden.');
@@ -70,12 +51,11 @@ form.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const docRef = doc(db, `${tipo}s`, user.uid);
+    const docRef = doc(db, `usuarios`, user.uid);
     await setDoc(docRef, {
       nombre,
       email,
       telefono,
-      tipo,
       uid: user.uid,
       registradoCon: 'formulario',
       creadoEn: new Date().toISOString()
@@ -96,26 +76,18 @@ form.addEventListener('submit', async (e) => {
 
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
-  const tipo = obtenerTipoCuenta();
-
-  if (!tipo) {
-    alert('Seleccioná primero si sos Usuario o Comercio.');
-    return;
-  }
-
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    const yaExiste = await existeUsuario(tipo, user.uid);
+    const docRef = doc(db, `usuarios`, user.uid);
+    const docSnap = await getDoc(docRef);
 
-    if (!yaExiste) {
-      const docRef = doc(db, `${tipo}s`, user.uid);
+    if (!docSnap.exists()) {
       await setDoc(docRef, {
         nombre: user.displayName || '',
         email: user.email,
         telefono: user.phoneNumber || '',
-        tipo,
         uid: user.uid,
         registradoCon: 'google',
         creadoEn: new Date().toISOString()
