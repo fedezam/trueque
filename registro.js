@@ -95,7 +95,7 @@ googleLoginBtn.addEventListener('click', async () => {
     }
 
     alert('Sesión iniciada con Google.');
-    window.location.href = 'inicio.html';
+    window.location.href = 'completar-perfil.html';
 
   } catch (error) {
     console.error(error);
