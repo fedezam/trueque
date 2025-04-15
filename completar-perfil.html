@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completar Perfil</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Completar Perfil</h2>
+
+    <form id="perfil-form">
+      <input type="text" id="nombre" placeholder="Nombre completo" required />
+      
+      <input type="email" id="email" placeholder="Correo electrónico" required disabled />
+
+      <input type="tel" id="telefono" placeholder="Teléfono" required />
+
+      <input type="number" id="edad" placeholder="Edad" required />
+
+      <select id="provincia" required>
+        <option value="">Seleccionar Provincia</option>
+        <option value="Buenos Aires">Buenos Aires</option>
+        <option value="CABA">CABA</option>
+        <!-- Aquí puedes agregar más provincias -->
+      </select>
+
+      <input type="text" id="localidad" placeholder="Localidad" required />
+
+      <input type="text" id="redes" placeholder="Redes sociales" />
+
+      <input type="text" id="formacion" placeholder="Formación académica" />
+
+      <input type="text" id="trabajo" placeholder="Trabajo actual" />
+
+      <div>
+        <button type="submit">Guardar Perfil</button>
+      </div>
+    </form>
+  </div>
+
+  <script type="module" src="completar-perfil.js"></script>
+</body>
+</html>
