@@ -27,6 +27,10 @@ const validarPassword = (password) => {
   return password.length >= 6 && tieneMayuscula && tieneEspecial;
 };
 
+// Leer código de referido desde la URL
+const params = new URLSearchParams(window.location.search);
+const referidoPor = params.get('ref') || null;
+
 // Registro con formulario
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -51,14 +55,17 @@ form.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const docRef = doc(db, `usuarios`, user.uid);
+    const docRef = doc(db, 'usuarios', user.uid);
     await setDoc(docRef, {
       nombre,
       email,
       telefono,
       uid: user.uid,
       registradoCon: 'formulario',
-      creadoEn: new Date().toISOString()
+      referidoPor,
+      codigoReferido: generarCodigoReferido(),
+      creadoEn: new Date().toISOString(),
+      completadoPerfil: false
     });
 
     alert('Registro exitoso.');
@@ -80,7 +87,7 @@ googleLoginBtn.addEventListener('click', async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    const docRef = doc(db, `usuarios`, user.uid);
+    const docRef = doc(db, 'usuarios', user.uid);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -90,7 +97,10 @@ googleLoginBtn.addEventListener('click', async () => {
         telefono: user.phoneNumber || '',
         uid: user.uid,
         registradoCon: 'google',
-        creadoEn: new Date().toISOString()
+        referidoPor,
+        codigoReferido: generarCodigoReferido(),
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
       });
     }
 
@@ -102,3 +112,13 @@ googleLoginBtn.addEventListener('click', async () => {
     alert('Error al iniciar sesión con Google.');
   }
 });
+
+// Generador de código de referido aleatorio
+function generarCodigoReferido() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let codigo = '';
+  for (let i = 0; i < 6; i++) {
+    codigo += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return codigo;
+}
