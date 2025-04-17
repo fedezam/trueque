@@ -1,85 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Completar Perfil</title>
-  <link rel="stylesheet" href="styles.css">
-  <script type="module" src="completar-perfil.js" defer></script>
+  <link rel="stylesheet" href="estilos.css" />
 </head>
 <body>
-  <h1>Completar Perfil</h1>
+  <h2>Completar Perfil</h2>
 
   <form id="completar-perfil-form">
-    <label for="nombre">Nombre </label>
-    <input type="text" id="nombre" required>
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" required />
 
-    <label for="apellido">Apellido</label>
-    <input type="text" id="apellido" required>
+    <label for="apellido">Apellido:</label>
+    <input type="text" id="apellido" required />
 
+    <label for="telefono">Teléfono:</label>
+    <input type="tel" id="telefono" required />
 
-    <label for="telefono">Teléfono</label>
-    <input type="tel" id="telefono" required>
+    <label for="edad">Edad:</label>
+    <input type="number" id="edad" min="1" required />
 
-    <label for="edad">Edad</label>
-    <select id="edad" required>
-      <option value="">Seleccioná tu edad</option>
-      <option value="-18">Menos de 18</option>
-      <option value="18-25">18 a 25</option>
-      <option value="26-35">26 a 35</option>
-      <option value="36-45">36 a 45</option>
-      <option value="46-60">46 a 60</option>
-      <option value="60+">Más de 60</option>
+    <label for="provincia">Provincia:</label>
+    <input type="text" id="provincia" required />
+
+    <label for="localidad">Localidad:</label>
+    <input type="text" id="localidad" required />
+
+    <label for="formacion-academica">Formación Académica:</label>
+    <input type="text" id="formacion-academica" />
+
+    <label for="trabajo">Trabajo Actual:</label>
+    <input type="text" id="trabajo" />
+
+    <label for="ecivil">Estado Civil:</label>
+    <select id="ecivil">
+      <option value="">Seleccionar</option>
+      <option value="soltero">Soltero/a</option>
+      <option value="casado">Casado/a</option>
+      <option value="divorciado">Divorciado/a</option>
+      <option value="viudo">Viudo/a</option>
     </select>
 
-    <label for="provincia">Provincia</label>
-    <select id="provincia" required></select>
+    <label for="hijos">Cantidad de Hijos:</label>
+    <input type="number" id="hijos" min="0" />
 
-    <label for="localidad">Localidad</label>
-    <select id="localidad" required></select>
-
-    
-
-    <label for="formacion-academica">Formación Académica</label>
-    <select id="formacion-academica">
-      <option value="">Seleccioná una opción</option>
-      <option value="no tiene estudios">No tiene estudios</option>
-      <option value="primaria">Primaria</option>
-      <option value="secundaria">Secundaria</option>
-      <option value="terciaria">Terciaria</option>
-      <option value="universitaria">Universitaria</option>
-    </select>
-
-    <label for="trabajo">Situación Laboral</label>
-    <select id="trabajo">
-      <option value="">Seleccioná una opción</option>
-      <option value="desempleado">Desempleado</option>
-      <option value="empleado">Empleado</option>
-      <option value="independiente">Trabajador independiente</option>
-      <option value="comerciante">Comerciante</option>
-      <option value="jubilado">Jubilado</option>
-      <option value="estudiante">Estudiante</option>
-    </select>
-
-    <label for="ecivil">Estado Civil</label>
-    <select id="ecivil" required>
-      <option value="">Seleccioná una opción</option>
-      <option value="soltero">Soltero</option>
-      <option value="casado">Casado</option>
-      <option value="divorciado">Divorciado</option>
-      <option value="en_pareja">En pareja</option>
-    </select>
-
-    <label for="hijos">¿Tenés hijos?</label>
-    <select id="hijos" required>
-      <option value="">Seleccioná una opción</option>
-      <option value="si">Sí</option>
-      <option value="no">No</option>
-    </select>
-
-
-    <button type="submit">Guardar perfil</button>
+    <button type="submit">Guardar Perfil</button>
   </form>
+
+  <!-- Firebase + Script -->
+  <script type="module" src="./firebase-config.js"></script>
+  <script type="module" src="./completar-perfil.js"></script>
 </body>
 </html>
+
 
