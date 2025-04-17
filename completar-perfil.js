@@ -1,4 +1,3 @@
-
 import { auth, db } from './firebase-config.js';
 import {
   doc,
@@ -13,16 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
     nombre: localStorage.getItem("nombre") || "",
     apellido: localStorage.getItem("apellido") || "",
     telefono: localStorage.getItem("telefono") || "",
-    email: localStorage.getItem("email") || "", // Solo por si se necesita
+    email: localStorage.getItem("email") || "",
   };
 
   // Cargar datos previos en los campos
   document.getElementById("nombre").value = datosPrevios.nombre;
   document.getElementById("apellido").value = datosPrevios.apellido;
   document.getElementById("telefono").value = datosPrevios.telefono;
-
-  // Acá podrías cargar provincias/localidades si lo necesitás
-  // cargarProvincias(); cargarLocalidades();
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -38,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       trabajo: document.getElementById("trabajo").value.trim(),
       estadoCivil: document.getElementById("ecivil").value.trim(),
       hijos: document.getElementById("hijos").value.trim(),
-      completadoPerfil: true // Marcamos el perfil como completo
+      completadoPerfil: true
     };
 
     try {
@@ -48,18 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Determinar colección: usuarios o comercios (opcional)
-      const coleccion = localStorage.getItem("tipoCuenta") || "usuarios"; // fallback
+      // Determinar colección: usuarios o comercios
+      const coleccion = localStorage.getItem("tipoCuenta") || "usuarios";
 
       const docRef = doc(db, coleccion, user.uid);
       await updateDoc(docRef, perfil);
 
-      // Borrar localStorage (opcional)
-      localStorage.removeItem("nombre");
-      localStorage.removeItem("apellido");
-      localStorage.removeItem("telefono");
-      localStorage.removeItem("email");
-      localStorage.removeItem("tipoCuenta");
+      // Borrar localStorage
+      ["nombre", "apellido", "telefono", "email", "tipoCuenta"].forEach(key => localStorage.removeItem(key));
 
       alert("Perfil guardado correctamente.");
       window.location.href = "dashboard.html";
@@ -70,3 +62,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
