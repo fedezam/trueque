@@ -108,11 +108,7 @@ form.addEventListener('submit', async (e) => {
 
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
-  if (!tipoCuenta) {
-    alert('Debés seleccionar un tipo de cuenta.');
-    return;
-  }
-
+  // ...
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
@@ -122,9 +118,14 @@ googleLoginBtn.addEventListener('click', async () => {
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
+      const nombreCompleto = user.displayName || '';
+      const nombres = nombreCompleto.split(' ');
+      const nombre = nombres[0];
+      const apellido = nombres.slice(1).join(' ');
+
       await setDoc(docRef, {
-        nombre: user.displayName || '',
-        apellido: '', // Podés completarlo en "completar-perfil"
+        nombre,
+        apellido,
         email: user.email,
         telefono: user.phoneNumber || '',
         uid: user.uid,
@@ -137,8 +138,8 @@ googleLoginBtn.addEventListener('click', async () => {
     }
 
     // Guardar en localStorage también
-    localStorage.setItem('nombre', user.displayName || '');
-    localStorage.setItem('apellido', '');
+    localStorage.setItem('nombre', nombre);
+    localStorage.setItem('apellido', apellido);
     localStorage.setItem('telefono', user.phoneNumber || '');
     localStorage.setItem('email', user.email);
 
