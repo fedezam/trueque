@@ -5,13 +5,12 @@ import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.3.1/fi
 const provinciasSelect = document.getElementById('provincia');
 const localidadesSelect = document.getElementById('localidad');
 
-// Cargar datos desde JSON local o remoto
+// Cargar provincias y localidades desde JSON
 fetch('localidades.json')
   .then(res => res.json())
   .then(data => {
     const localidades = data.localidades_censales;
 
-    // Extraer provincias únicas
     const provincias = [...new Set(localidades.map(loc => loc.provincia.nombre))];
     provincias.sort().forEach(prov => {
       const option = document.createElement('option');
@@ -20,7 +19,6 @@ fetch('localidades.json')
       provinciasSelect.appendChild(option);
     });
 
-    // Filtrar localidades según la provincia elegida
     provinciasSelect.addEventListener('change', () => {
       const provinciaSeleccionada = provinciasSelect.value;
       localidadesSelect.innerHTML = '<option value="">Seleccioná una localidad</option>';
@@ -45,32 +43,34 @@ onAuthStateChanged(auth, (user) => {
       e.preventDefault();
 
       const nombre = document.getElementById('nombre').value.trim();
+      const apellido = document.getElementById('apellido').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const edad = document.getElementById('edad').value.trim();
       const provincia = provinciasSelect.value.trim();
       const localidad = localidadesSelect.value.trim();
-      const redes = document.getElementById('redes-sociales').value.trim();
       const formacion = document.getElementById('formacion-academica').value.trim();
       const trabajo = document.getElementById('trabajo').value.trim();
+      const estadoCivil = document.getElementById('ecivil').value.trim();
+      const hijos = document.getElementById('hijos').value.trim();
 
-      if (!nombre || !telefono || !edad || !provincia || !localidad) {
+      if (!nombre || !apellido || !telefono || !edad || !provincia || !localidad || !estadoCivil || !hijos) {
         alert('Por favor, completá todos los campos obligatorios.');
         return;
       }
 
-      const tipoColeccion = 'usuarios'; // O 'comercios' si lo detectás desde otro campo
-
       try {
-        const docRef = doc(db, tipoColeccion, user.uid);
+        const docRef = doc(db, 'usuarios', user.uid);
         await setDoc(docRef, {
           nombre,
+          apellido,
           telefono,
           edad,
           provincia,
           localidad,
-          redes,
           formacion,
           trabajo,
+          estadoCivil,
+          hijos,
           completadoPerfil: true,
         }, { merge: true });
 
