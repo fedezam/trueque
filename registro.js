@@ -10,15 +10,18 @@ import {
   getDoc
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 
-const form = document.getElementById('register-form');
+const form = document.getElementById('registro-form');
 const googleLoginBtn = document.getElementById('google-login');
 
 // Mostrar contraseña
-document.getElementById('mostrar-contrasena').addEventListener('change', (e) => {
-  const tipo = e.target.checked ? 'text' : 'password';
-  document.getElementById('password').type = tipo;
-  document.getElementById('confirm-password').type = tipo;
-});
+const mostrarCheckbox = document.getElementById('mostrar-contrasena');
+if (mostrarCheckbox) {
+  mostrarCheckbox.addEventListener('change', (e) => {
+    const tipo = e.target.checked ? 'text' : 'password';
+    document.getElementById('password').type = tipo;
+    document.getElementById('confirm-password').type = tipo;
+  });
+}
 
 // Validación de contraseña segura
 const validarPassword = (password) => {
@@ -44,7 +47,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (!tipoCuenta) {
-    alert('Debes seleccionar un tipo de cuenta.');
+    alert('Debés seleccionar un tipo de cuenta.');
     return;
   }
 
@@ -84,11 +87,11 @@ form.addEventListener('submit', async (e) => {
       completadoPerfil: false
     });
 
-    // Guardar datos en localStorage para completar-perfil.html
-    localStorage.setItem("nombre", nombre);
-    localStorage.setItem("apellido", apellido);
-    localStorage.setItem("telefono", telefono);
-    localStorage.setItem("email", email);
+    // Guardar datos en localStorage para usarlos en completar-perfil.html
+    localStorage.setItem('nombre', nombre);
+    localStorage.setItem('apellido', apellido);
+    localStorage.setItem('telefono', telefono);
+    localStorage.setItem('email', email);
 
     alert('Registro exitoso.');
     window.location.href = 'completar-perfil.html';
@@ -106,7 +109,7 @@ form.addEventListener('submit', async (e) => {
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
   if (!tipoCuenta) {
-    alert('Debes seleccionar un tipo de cuenta.');
+    alert('Debés seleccionar un tipo de cuenta.');
     return;
   }
 
@@ -121,7 +124,7 @@ googleLoginBtn.addEventListener('click', async () => {
     if (!docSnap.exists()) {
       await setDoc(docRef, {
         nombre: user.displayName || '',
-        apellido: '', // Google no da apellido separado
+        apellido: '', // Podés completarlo en "completar-perfil"
         email: user.email,
         telefono: user.phoneNumber || '',
         uid: user.uid,
@@ -133,11 +136,11 @@ googleLoginBtn.addEventListener('click', async () => {
       });
     }
 
-    // Guardar en localStorage para completar-perfil.html
-    localStorage.setItem("nombre", user.displayName || '');
-    localStorage.setItem("apellido", '');
-    localStorage.setItem("telefono", user.phoneNumber || '');
-    localStorage.setItem("email", user.email);
+    // Guardar en localStorage también
+    localStorage.setItem('nombre', user.displayName || '');
+    localStorage.setItem('apellido', '');
+    localStorage.setItem('telefono', user.phoneNumber || '');
+    localStorage.setItem('email', user.email);
 
     alert('Sesión iniciada con Google.');
     window.location.href = 'completar-perfil.html';
@@ -157,3 +160,4 @@ function generarCodigoReferido() {
   }
   return codigo;
 }
+
