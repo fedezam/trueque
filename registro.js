@@ -69,7 +69,7 @@ form.addEventListener('submit', async (e) => {
     });
 
     alert('Registro exitoso.');
-    window.location.href = 'inicio.html';
+    window.location.href = 'completar-perfil.html';
 
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
