@@ -76,3 +76,40 @@ button:hover {
 .forgot a:hover {
   text-decoration: underline;
 }
+
+.tipo-cuenta label {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.tipo-cuenta input[type="radio"] {
+  display: none;
+}
+
+.tipo-cuenta input[type="radio"]:checked + span {
+  color: #007bff; /* Color del texto cuando está seleccionado */
+}
+
+.tipo-cuenta label span {
+  position: relative;
+  padding-left: 25px;
+}
+
+.tipo-cuenta label span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+}
+
+.tipo-cuenta input[type="radio"]:checked + span::before {
+  background-color: #007bff; /* Color del fondo cuando está seleccionado */
+  border-color: #007bff;
+}
