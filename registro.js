@@ -31,9 +31,22 @@ const validarPassword = (password) => {
 const params = new URLSearchParams(window.location.search);
 const referidoPor = params.get('ref') || null;
 
+// Obtener tipo de cuenta
+let tipoCuenta = null;
+document.querySelectorAll('input[name="tipo-cuenta"]').forEach((input) => {
+  input.addEventListener('change', (e) => {
+    tipoCuenta = e.target.id;
+  });
+});
+
 // Registro con formulario
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  if (!tipoCuenta) {
+    alert('Debes seleccionar un tipo de cuenta.');
+    return;
+  }
 
   const nombre = document.getElementById('nombre').value.trim();
   const email = document.getElementById('email').value.trim();
@@ -55,7 +68,8 @@ form.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const docRef = doc(db, 'usuarios', user.uid);
+    const coleccion = tipoCuenta === 'tipo-usuario' ? 'usuarios' : 'comercios';
+    const docRef = doc(db, coleccion, user.uid);
     await setDoc(docRef, {
       nombre,
       email,
@@ -83,11 +97,17 @@ form.addEventListener('submit', async (e) => {
 
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
+  if (!tipoCuenta) {
+    alert('Debes seleccionar un tipo de cuenta.');
+    return;
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    const docRef = doc(db, 'usuarios', user.uid);
+    const coleccion = tipoCuenta === 'tipo-usuario' ? 'usuarios' : 'comercios';
+    const docRef = doc(db, coleccion, user.uid);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
