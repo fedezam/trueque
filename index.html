@@ -11,7 +11,18 @@
   <div class="container">
     <h1>Bienvenido a TRUEQUE</h1>
     <p>La plataforma para intercambiar lo que necesitas.</p>
-    <a href="registro.html" class="btn">Regístrate</a>
+    <a href="" class="btn" id="registro-link">Regístrate</a>
   </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    const registroLink = document.getElementById('registro-link');
+    if (ref) {
+      registroLink.href = `registro.html?ref=${ref}`;
+    } else {
+      registroLink.href = 'registro.html';
+    }
+  </script>
 </body>
 </html>
