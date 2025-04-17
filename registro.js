@@ -49,6 +49,7 @@ form.addEventListener('submit', async (e) => {
   }
 
   const nombre = document.getElementById('nombre').value.trim();
+  const apellido = document.getElementById('apellido').value.trim();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirm-password').value;
@@ -72,6 +73,7 @@ form.addEventListener('submit', async (e) => {
     const docRef = doc(db, coleccion, user.uid);
     await setDoc(docRef, {
       nombre,
+      apellido,
       email,
       telefono,
       uid: user.uid,
@@ -81,6 +83,12 @@ form.addEventListener('submit', async (e) => {
       creadoEn: new Date().toISOString(),
       completadoPerfil: false
     });
+
+    // Guardar datos en localStorage para completar-perfil.html
+    localStorage.setItem("nombre", nombre);
+    localStorage.setItem("apellido", apellido);
+    localStorage.setItem("telefono", telefono);
+    localStorage.setItem("email", email);
 
     alert('Registro exitoso.');
     window.location.href = 'completar-perfil.html';
@@ -113,6 +121,7 @@ googleLoginBtn.addEventListener('click', async () => {
     if (!docSnap.exists()) {
       await setDoc(docRef, {
         nombre: user.displayName || '',
+        apellido: '', // Google no da apellido separado
         email: user.email,
         telefono: user.phoneNumber || '',
         uid: user.uid,
@@ -123,6 +132,12 @@ googleLoginBtn.addEventListener('click', async () => {
         completadoPerfil: false
       });
     }
+
+    // Guardar en localStorage para completar-perfil.html
+    localStorage.setItem("nombre", user.displayName || '');
+    localStorage.setItem("apellido", '');
+    localStorage.setItem("telefono", user.phoneNumber || '');
+    localStorage.setItem("email", user.email);
 
     alert('Sesión iniciada con Google.');
     window.location.href = 'completar-perfil.html';
