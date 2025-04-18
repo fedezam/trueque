@@ -51,6 +51,8 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
+  localStorage.setItem('tipoCuenta', tipoCuenta);
+
   const nombre = document.getElementById('nombre').value.trim();
   const apellido = document.getElementById('apellido').value.trim();
   const email = document.getElementById('email').value.trim();
@@ -108,7 +110,11 @@ form.addEventListener('submit', async (e) => {
 
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
-  // ...
+  if (!tipoCuenta) {
+    alert('Debes seleccionar un tipo de cuenta.');
+    return;
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
@@ -117,11 +123,12 @@ googleLoginBtn.addEventListener('click', async () => {
     const docRef = doc(db, coleccion, user.uid);
     const docSnap = await getDoc(docRef);
 
+    let nombre, apellido;
     if (!docSnap.exists()) {
       const nombreCompleto = user.displayName || '';
       const nombres = nombreCompleto.split(' ');
-      const nombre = nombres[0];
-      const apellido = nombres.slice(1).join(' ');
+      nombre = nombres[0];
+      apellido = nombres.slice(1).join(' ');
 
       await setDoc(docRef, {
         nombre,
@@ -135,13 +142,17 @@ googleLoginBtn.addEventListener('click', async () => {
         creadoEn: new Date().toISOString(),
         completadoPerfil: false
       });
+    } else {
+      nombre = docSnap.data().nombre;
+      apellido = docSnap.data().apellido;
     }
 
     // Guardar en localStorage también
     localStorage.setItem('nombre', nombre);
     localStorage.setItem('apellido', apellido);
-    localStorage.setItem('telefono', user.phoneNumber || '');
+    localStorage.setItem('telefono', docSnap.data().telefono || user.phoneNumber || '');
     localStorage.setItem('email', user.email);
+    localStorage.setItem('tipoCuenta', tipoCuenta);
 
     alert('Sesión iniciada con Google.');
     window.location.href = 'completar-perfil.html';
@@ -151,7 +162,6 @@ googleLoginBtn.addEventListener('click', async () => {
     alert('Error al iniciar sesión con Google.');
   }
 });
-
 // Generador de código de referido aleatorio
 function generarCodigoReferido() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
