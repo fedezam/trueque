@@ -14,14 +14,11 @@ const form = document.getElementById('registro-form');
 const googleLoginBtn = document.getElementById('google-login');
 
 // Mostrar contraseña
-const mostrarCheckbox = document.getElementById('mostrar-contrasena');
-if (mostrarCheckbox) {
-  mostrarCheckbox.addEventListener('change', (e) => {
-    const tipo = e.target.checked ? 'text' : 'password';
-    document.getElementById('password').type = tipo;
-    document.getElementById('confirm-password').type = tipo;
-  });
-}
+document.getElementById('mostrar-contrasena')?.addEventListener('change', (e) => {
+  const tipo = e.target.checked ? 'text' : 'password';
+  document.getElementById('password').type = tipo;
+  document.getElementById('confirm-password').type = tipo;
+});
 
 // Validación de contraseña segura
 const validarPassword = (password) => {
@@ -38,9 +35,20 @@ const referidoPor = params.get('ref') || null;
 let tipoCuenta = null;
 document.querySelectorAll('input[name="tipo-cuenta"]').forEach((input) => {
   input.addEventListener('change', (e) => {
-    tipoCuenta = e.target.id;
+    tipoCuenta = e.target.value;
   });
 });
+
+// Generador de código de referido
+function generarCodigoReferido() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+// Guardar datos mínimos en localStorage
+function guardarTipoCuentaEnLocal() {
+  localStorage.setItem('tipoCuenta', tipoCuenta);
+}
 
 // Registro con formulario
 form.addEventListener('submit', async (e) => {
@@ -50,8 +58,6 @@ form.addEventListener('submit', async (e) => {
     alert('Debés seleccionar un tipo de cuenta.');
     return;
   }
-
-  localStorage.setItem('tipoCuenta', tipoCuenta);
 
   const nombre = document.getElementById('nombre').value.trim();
   const apellido = document.getElementById('apellido').value.trim();
@@ -66,7 +72,7 @@ form.addEventListener('submit', async (e) => {
   }
 
   if (!validarPassword(password)) {
-    alert('La contraseña no cumple con los requisitos.');
+    alert('La contraseña debe tener al menos 6 caracteres, una mayúscula y un carácter especial.');
     return;
   }
 
@@ -74,9 +80,8 @@ form.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const coleccion = tipoCuenta === 'tipo-usuario' ? 'usuarios' : 'comercios';
-    const docRef = doc(db, coleccion, user.uid);
-    await setDoc(docRef, {
+    const coleccion = tipoCuenta === 'usuario' ? 'usuarios' : 'comercios';
+    await setDoc(doc(db, coleccion, user.uid), {
       nombre,
       apellido,
       email,
@@ -89,12 +94,7 @@ form.addEventListener('submit', async (e) => {
       completadoPerfil: false
     });
 
-    // Guardar datos en localStorage para usarlos en completar-perfil.html
-    localStorage.setItem('nombre', nombre);
-    localStorage.setItem('apellido', apellido);
-    localStorage.setItem('telefono', telefono);
-    localStorage.setItem('email', email);
-
+    guardarTipoCuentaEnLocal();
     alert('Registro exitoso.');
     window.location.href = 'completar-perfil.html';
 
@@ -111,7 +111,7 @@ form.addEventListener('submit', async (e) => {
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
   if (!tipoCuenta) {
-    alert('Debes seleccionar un tipo de cuenta.');
+    alert('Debés seleccionar un tipo de cuenta.');
     return;
   }
 
@@ -119,22 +119,21 @@ googleLoginBtn.addEventListener('click', async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    const coleccion = tipoCuenta === 'tipo-usuario' ? 'usuarios' : 'comercios';
+    const coleccion = tipoCuenta === 'usuario' ? 'usuarios' : 'comercios';
     const docRef = doc(db, coleccion, user.uid);
     const docSnap = await getDoc(docRef);
 
-    let nombre, apellido;
     if (!docSnap.exists()) {
       const nombreCompleto = user.displayName || '';
-      const nombres = nombreCompleto.split(' ');
-      nombre = nombres[0];
-      apellido = nombres.slice(1).join(' ');
+      const [nombre = '', ...resto] = nombreCompleto.split(' ');
+      const apellido = resto.join(' ') || '';
+      const telefono = user.phoneNumber || '';
 
       await setDoc(docRef, {
         nombre,
         apellido,
         email: user.email,
-        telefono: user.phoneNumber || '',
+        telefono,
         uid: user.uid,
         registradoCon: 'google',
         referidoPor,
@@ -142,18 +141,9 @@ googleLoginBtn.addEventListener('click', async () => {
         creadoEn: new Date().toISOString(),
         completadoPerfil: false
       });
-    } else {
-      nombre = docSnap.data().nombre;
-      apellido = docSnap.data().apellido;
     }
 
-    // Guardar en localStorage también
-    localStorage.setItem('nombre', nombre);
-    localStorage.setItem('apellido', apellido);
-    localStorage.setItem('telefono', docSnap.data().telefono || user.phoneNumber || '');
-    localStorage.setItem('email', user.email);
-    localStorage.setItem('tipoCuenta', tipoCuenta);
-
+    guardarTipoCuentaEnLocal();
     alert('Sesión iniciada con Google.');
     window.location.href = 'completar-perfil.html';
 
@@ -162,13 +152,5 @@ googleLoginBtn.addEventListener('click', async () => {
     alert('Error al iniciar sesión con Google.');
   }
 });
-// Generador de código de referido aleatorio
-function generarCodigoReferido() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let codigo = '';
-  for (let i = 0; i < 6; i++) {
-    codigo += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return codigo;
-}
+
 
