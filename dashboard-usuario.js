@@ -42,7 +42,10 @@ onAuthStateChanged(auth, async (user) => {
     const userData = userDoc.data();
     welcomeMessage.textContent = `Bienvenido, ${userData.nombre || "Usuario"} ${userData.apellido || ""}`;
     tipoTexto.textContent = `Estás usando la plataforma como: ${tipoCuenta || "usuario"}`;
-    tqcBalance.textContent = `Tienes (${userData.tqc || 0}) TqC`;
+
+    // Sumamos todos los TqC ganados por comercio
+    const totalTqc = Object.values(userData.tqcPorComercio || {}).reduce((sum, val) => sum + val, 0);
+    tqcBalance.textContent = `Tienes (${totalTqc}) TqC`;
 
     const ultimaTarea = userData.timestampUltimaTarea?.toMillis() || 0;
     const tiempoTranscurrido = Date.now() - ultimaTarea;
@@ -65,55 +68,75 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-async function cargarComercios(tareasCompletadas, localidadUsuario) {
+async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
   try {
     const comerciosSnap = await getDocs(collection(db, "comercios"));
     container.innerHTML = "";
 
+    const tareasDisponibles = [];
+
     comerciosSnap.forEach((docSnap) => {
       const comercio = docSnap.data();
+      const comercioUid = docSnap.id;
 
-      if (
-        comercio.localidad === localidadUsuario &&
-        comercio.task &&
-        comercio.task.link &&
-        comercio.task.recompensa &&
-        !tareasCompletadas.includes(comercio.uid)
-      ) {
-        const card = document.createElement("div");
-        card.classList.add("tarea-card");
+      if (comercio.localidad === localidadUsuario && Array.isArray(comercio.tasks)) {
+        const tareasValidas = comercio.tasks.filter(tarea =>
+          !tareasCompletadas.some(tc => tc.comercioUid === comercioUid && tc.tareaId === tarea.id)
+        );
 
-        card.innerHTML = `
-          <h3>${comercio.nombre}</h3>
-          <p>📍 ${comercio.localidad}, ${comercio.provincia}</p>
-          <p>🏷️ Rubro: ${comercio.rubro || "No especificado"}</p>
-          <p>🪙 Recompensa: ${comercio.task.recompensa} TqC</p>
-          <button class="btn-tarea" data-link="${comercio.task.link}" data-recompensa="${comercio.task.recompensa}" data-comercio="${comercio.uid}">
-            Realizar tarea
-          </button>
-        `;
-
-        container.appendChild(card);
+        tareasValidas.forEach(tarea => {
+          tareasDisponibles.push({
+            ...tarea,
+            comercioUid,
+            comercioNombre: comercio.nombre,
+            localidad: comercio.localidad,
+            provincia: comercio.provincia,
+            rubro: comercio.rubro || "No especificado"
+          });
+        });
       }
     });
 
-    if (container.innerHTML === "") {
+    const aleatorias = tareasDisponibles.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    if (aleatorias.length === 0) {
       container.innerHTML = "<p>🚫 No hay tareas disponibles en tu localidad por ahora.</p>";
+      return;
     }
+
+    aleatorias.forEach((tarea) => {
+      const card = document.createElement("div");
+      card.classList.add("tarea-card");
+      card.innerHTML = `
+        <h3>${tarea.comercioNombre}</h3>
+        <p>📍 ${tarea.localidad}, ${tarea.provincia}</p>
+        <p>🏷️ Rubro: ${tarea.rubro}</p>
+        <p>🪙 Recompensa: ${tarea.recompensa} TqC</p>
+        <button class="btn-tarea"
+          data-link="${tarea.link}"
+          data-recompensa="${tarea.recompensa}"
+          data-comercio="${tarea.comercioUid}"
+          data-tarea="${tarea.id}">
+          Realizar tarea
+        </button>
+      `;
+      container.appendChild(card);
+    });
+
   } catch (err) {
     console.error("Error al cargar tareas:", err);
     container.innerHTML = "<p>Error al mostrar tareas disponibles.</p>";
   }
 }
 
-// Click en "Realizar tarea"
 container.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btn-tarea")) {
     const link = e.target.dataset.link;
     const recompensa = parseInt(e.target.dataset.recompensa);
     const comercioUid = e.target.dataset.comercio;
+    const tareaId = e.target.dataset.tarea;
 
-    if (!link || !comercioUid || isNaN(recompensa)) return;
+    if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
 
     window.open(link, "_blank");
     alert("Se abrió la tarea. Esperá 30 segundos para obtener la recompensa...");
@@ -125,24 +148,26 @@ container.addEventListener("click", async (e) => {
       if (userSnap.exists()) {
         const data = userSnap.data();
         const tareas = data.tareasCompletadas || [];
+        const tqcPorComercio = data.tqcPorComercio || {};
 
-        if (tareas.includes(comercioUid)) {
-          return alert("Ya realizaste esta tarea.");
-        }
+        const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
+        if (yaHecha) return alert("Ya realizaste esta tarea.");
 
-        const nuevoSaldo = (data.tqc || 0) + recompensa;
-        tareas.push(comercioUid);
+        const saldoActual = tqcPorComercio[comercioUid] || 0;
+        const nuevoSaldo = saldoActual + recompensa;
+
+        tareas.push({ comercioUid, tareaId });
 
         await updateDoc(userRef, {
-          tqc: nuevoSaldo,
+          [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
           tareasCompletadas: tareas,
           timestampUltimaTarea: new Date()
         });
 
-        alert(`✅ ¡Ganaste ${recompensa} TqC! Tu nuevo saldo es ${nuevoSaldo}`);
+        alert(`✅ ¡Ganaste ${recompensa} TqC! Tu nuevo saldo en este comercio es ${nuevoSaldo}`);
         location.reload();
       }
-    }, 30000); // 30 segundos
+    }, 30000);
   }
 });
 
@@ -155,3 +180,4 @@ document.getElementById("cerrar-sesion").addEventListener("click", async () => {
     console.error("Error al cerrar sesión:", err);
   }
 });
+
