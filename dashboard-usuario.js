@@ -19,8 +19,8 @@ const avisoTiempo = document.getElementById("aviso-tiempo");
 
 const TIEMPO_ESPERA_MS = 5 * 60 * 60 * 1000; // 5 horas
 const tipoCuenta = localStorage.getItem("tipoCuenta");
-
 let usuarioActual = null;
+let tareaEnCurso = false;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user || !user.uid) {
@@ -43,7 +43,6 @@ onAuthStateChanged(auth, async (user) => {
     welcomeMessage.textContent = `Bienvenido, ${userData.nombre || "Usuario"} ${userData.apellido || ""}`;
     tipoTexto.textContent = `Estás usando la plataforma como: ${tipoCuenta || "usuario"}`;
 
-    // Sumamos todos los TqC ganados por comercio
     const totalTqc = Object.values(userData.tqcPorComercio || {}).reduce((sum, val) => sum + val, 0);
     tqcBalance.textContent = `Tienes (${totalTqc}) TqC`;
 
@@ -130,16 +129,35 @@ async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
 }
 
 container.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("btn-tarea")) {
-    const link = e.target.dataset.link;
-    const recompensa = parseInt(e.target.dataset.recompensa);
-    const comercioUid = e.target.dataset.comercio;
-    const tareaId = e.target.dataset.tarea;
+  if (e.target.classList.contains("btn-tarea") && !tareaEnCurso) {
+    tareaEnCurso = true;
+
+    const button = e.target;
+    const link = button.dataset.link;
+    const recompensa = parseInt(button.dataset.recompensa);
+    const comercioUid = button.dataset.comercio;
+    const tareaId = button.dataset.tarea;
 
     if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
 
+    // Desactivar todos los botones
+    const todosLosBotones = document.querySelectorAll(".btn-tarea");
+    todosLosBotones.forEach(btn => {
+      btn.disabled = true;
+      if (btn !== button) btn.textContent = "🚫 Esperando otra tarea...";
+    });
+
+    // Abrir el link
     window.open(link, "_blank");
-    alert("Se abrió la tarea. Esperá 30 segundos para obtener la recompensa...");
+
+    let tiempoRestante = 60;
+    const originalText = button.textContent;
+
+    const intervalo = setInterval(() => {
+      button.textContent = `⏳ Esperando ${tiempoRestante}s...`;
+      tiempoRestante--;
+      if (tiempoRestante < 0) clearInterval(intervalo);
+    }, 1000);
 
     setTimeout(async () => {
       const userRef = doc(db, "usuarios", usuarioActual.uid);
@@ -151,7 +169,12 @@ container.addEventListener("click", async (e) => {
         const tqcPorComercio = data.tqcPorComercio || {};
 
         const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
-        if (yaHecha) return alert("Ya realizaste esta tarea.");
+        if (yaHecha) {
+          clearInterval(intervalo);
+          button.textContent = originalText;
+          tareaEnCurso = false;
+          return alert("Ya realizaste esta tarea.");
+        }
 
         const saldoActual = tqcPorComercio[comercioUid] || 0;
         const nuevoSaldo = saldoActual + recompensa;
@@ -164,10 +187,22 @@ container.addEventListener("click", async (e) => {
           timestampUltimaTarea: new Date()
         });
 
+        clearInterval(intervalo);
         alert(`✅ ¡Ganaste ${recompensa} TqC! Tu nuevo saldo en este comercio es ${nuevoSaldo}`);
-        location.reload();
+
+        // Eliminar la tarea realizada
+        const card = button.closest(".tarea-card");
+        if (card) card.remove();
+
+        // Reactivar los botones restantes
+        document.querySelectorAll(".btn-tarea").forEach(btn => {
+          btn.disabled = false;
+          btn.textContent = "Realizar tarea";
+        });
+
+        tareaEnCurso = false;
       }
-    }, 30000);
+    }, 60000);
   }
 });
 
@@ -180,4 +215,3 @@ document.getElementById("cerrar-sesion").addEventListener("click", async () => {
     console.error("Error al cerrar sesión:", err);
   }
 });
-
