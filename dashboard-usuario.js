@@ -129,82 +129,84 @@ async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
 }
 
 container.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("btn-tarea") && !tareaEnCurso) {
-    tareaEnCurso = true;
+  if (!e.target.classList.contains("btn-tarea") || tareaEnCurso) return;
 
-    const button = e.target;
-    const link = button.dataset.link;
-    const recompensa = parseInt(button.dataset.recompensa);
-    const comercioUid = button.dataset.comercio;
-    const tareaId = button.dataset.tarea;
+  tareaEnCurso = true;
 
-    if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
+  const button = e.target;
+  const link = button.dataset.link;
+  const recompensa = parseInt(button.dataset.recompensa);
+  const comercioUid = button.dataset.comercio;
+  const tareaId = button.dataset.tarea;
 
-    // Desactivar todos los botones
-    const todosLosBotones = document.querySelectorAll(".btn-tarea");
-    todosLosBotones.forEach(btn => {
-      btn.disabled = true;
-      if (btn !== button) btn.textContent = "🚫 Esperando otra tarea...";
-    });
+  if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
 
-    // Abrir el link
-    window.open(link, "_blank");
+  // Desactivar todos los botones
+  const botones = document.querySelectorAll(".btn-tarea");
+  botones.forEach(btn => {
+    btn.disabled = true;
+    if (btn !== button) {
+      btn.textContent = "⏳ Espera antes de hacer otra tarea";
+    }
+  });
 
-    let tiempoRestante = 60;
-    const originalText = button.textContent;
+  // Abrir link
+  window.open(link, "_blank");
 
-    const intervalo = setInterval(() => {
-      button.textContent = `⏳ Esperando ${tiempoRestante}s...`;
-      tiempoRestante--;
-      if (tiempoRestante < 0) clearInterval(intervalo);
-    }, 1000);
+  let tiempoRestante = 60;
+  const originalText = button.textContent;
 
-    setTimeout(async () => {
-      const userRef = doc(db, "usuarios", usuarioActual.uid);
-      const userSnap = await getDoc(userRef);
+  const intervalo = setInterval(() => {
+    button.textContent = `⏳ Espera ${tiempoRestante}s antes de otra tarea`;
+    tiempoRestante--;
+    if (tiempoRestante < 0) clearInterval(intervalo);
+  }, 1000);
 
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        const tareas = data.tareasCompletadas || [];
-        const tqcPorComercio = data.tqcPorComercio || {};
+  setTimeout(async () => {
+    const userRef = doc(db, "usuarios", usuarioActual.uid);
+    const userSnap = await getDoc(userRef);
 
-        const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
-        if (yaHecha) {
-          clearInterval(intervalo);
-          button.textContent = originalText;
-          tareaEnCurso = false;
-          return alert("Ya realizaste esta tarea.");
-        }
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      const tareas = data.tareasCompletadas || [];
+      const tqcPorComercio = data.tqcPorComercio || {};
 
-        const saldoActual = tqcPorComercio[comercioUid] || 0;
-        const nuevoSaldo = saldoActual + recompensa;
-
-        tareas.push({ comercioUid, tareaId });
-
-        await updateDoc(userRef, {
-          [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
-          tareasCompletadas: tareas,
-          timestampUltimaTarea: new Date()
-        });
-
+      const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
+      if (yaHecha) {
         clearInterval(intervalo);
-        alert(`✅ ¡Ganaste ${recompensa} TqC! Tu nuevo saldo en este comercio es ${nuevoSaldo}`);
-
-        // Eliminar la tarea realizada
-        const card = button.closest(".tarea-card");
-        if (card) card.remove();
-
-        // Reactivar los botones restantes
-        document.querySelectorAll(".btn-tarea").forEach(btn => {
-          btn.disabled = false;
-          btn.textContent = "Realizar tarea";
-        });
-
+        button.textContent = originalText;
         tareaEnCurso = false;
+        return;
       }
-    }, 60000);
-  }
+
+      const saldoActual = tqcPorComercio[comercioUid] || 0;
+      const nuevoSaldo = saldoActual + recompensa;
+
+      tareas.push({ comercioUid, tareaId });
+
+      await updateDoc(userRef, {
+        [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
+        tareasCompletadas: tareas,
+        timestampUltimaTarea: new Date()
+      });
+
+      clearInterval(intervalo);
+
+      // Eliminar la tarea del DOM
+      const card = button.closest(".tarea-card");
+      if (card) card.remove();
+
+      // Reactivar los botones restantes
+      document.querySelectorAll(".btn-tarea").forEach(btn => {
+        btn.disabled = false;
+        btn.textContent = "Realizar tarea";
+      });
+
+      tareaEnCurso = false;
+    }
+  }, 60000); // 60 segundos reales
 });
+
 
 // Cerrar sesión
 document.getElementById("cerrar-sesion").addEventListener("click", async () => {
