@@ -3,62 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard - Comercio</title>
+  <title>Dashboard Comercio</title>
   <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="dashboard-comercio.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Bienvenido, Comercio</h1>
-    <p>Este es tu panel de control. Aquí podrás gestionar tu cuenta y tus productos.</p>
-    
-    <div>
-      <h2>Mi Cuenta</h2>
-      <p>Nombre: <span id="nombre"></span></p>
-      <p>Email: <span id="email"></span></p>
-      <p>Teléfono: <span id="telefono"></span></p>
-    </div>
+  <nav>
+    <ul class="navbar">
+      <li><a href="dashboard-comercio.html" class="activo">🏪 Mi Comercio</a></li>
+      <li><button id="cerrar-sesion">🔒 Cerrar sesión</button></li>
+    </ul>
+  </nav>
 
-    <button onclick="logout()">Cerrar sesión</button>
-  </div>
+  <main>
+    <section class="bienvenida">
+      <h1 id="welcome-message">Bienvenido</h1>
+      <p id="comercio-info"></p>
+    </section>
 
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
-    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
-
-    const nombreSpan = document.getElementById('nombre');
-    const emailSpan = document.getElementById('email');
-    const telefonoSpan = document.getElementById('telefono');
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-
-        try {
-          const docRef = doc(db, 'comercios', uid);
-          const docSnap = await getDoc(docRef);
-
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            nombreSpan.textContent = data.nombre || '(Sin nombre)';
-            emailSpan.textContent = data.email || '(Sin email)';
-            telefonoSpan.textContent = data.telefono || '(Sin teléfono)';
-          } else {
-            alert('No se encontraron datos del comercio.');
-          }
-        } catch (err) {
-          console.error('Error al obtener los datos:', err);
-        }
-      } else {
-        window.location.href = 'registr.html'; // Redirige si no hay sesión
-      }
-    });
-
-    window.logout = async function () {
-      await signOut(auth);
-      window.location.href = 'registr.html';
-    };
-  </script>
+    <section class="formulario-tareas">
+      <h2>📤 Gestionar Tareas (máx. 10)</h2>
+      <form id="tareas-form">
+        <div id="campos-tareas"></div>
+        <button type="submit">Guardar nuevas tareas</button>
+      </form>
+      <p id="estado-guardado"></p>
+    </section>
+  </main>
 </body>
 </html>
-
