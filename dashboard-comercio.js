@@ -119,7 +119,18 @@ import { auth, db } from "./firebase-config.js";
  
    if (nuevasTareas.length === 0) {
      estadoGuardado.textContent = "❗ Ingresá al menos un nuevo link válido.";
- @@ -106,12 +127,13 @@
+     return;
+   }
+ 
+   const nuevasTasksFinales = [...tareasExistentes, ...nuevasTareas].slice(0, MAX_TAREAS);
+ 
+   try {
+     await updateDoc(comercioDocRef, { tasks: nuevasTasksFinales });
+     estadoGuardado.textContent = "✅ Nuevas tareas guardadas correctamente.";
+     location.reload();
+   } catch (err) {
+     console.error("Error al guardar nuevas tareas:", err);
+     estadoGuardado.textContent = "❌ Error al guardar nuevas tareas.";
    }
  });
  
