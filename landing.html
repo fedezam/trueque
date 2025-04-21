@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¡Casi completás tu tarea!</title>
+  <style>
+    :root {
+      --primario: #007BFF;
+      --gris: #f2f2f2;
+      --oscuro: #333;
+      --verde: #28a745;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--gris);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: var(--oscuro);
+    }
+
+    header {
+      background-color: var(--primario);
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .contenedor {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .progreso {
+      margin: 20px auto;
+      width: 100%;
+      background-color: #ddd;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .barra {
+      height: 100%;
+      width: 0%;
+      background-color: var(--verde);
+      transition: width 1s linear;
+    }
+
+    .btn-continuar {
+      margin-top: 30px;
+      padding: 15px 25px;
+      font-size: 18px;
+      background-color: var(--primario);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      transition: background-color 0.3s;
+    }
+
+    .btn-continuar:hover {
+      background-color: #0056b3;
+    }
+
+    .ads-placeholder {
+      margin-top: 40px;
+      background: #e0e0e0;
+      border: 2px dashed #aaa;
+      height: 90px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      color: #666;
+    }
+  </style>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_BUCKET",
+      messagingSenderId: "TU_MSG_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get("uid");
+    const tarea = params.get("tarea");
+    const goto = params.get("goto");
+
+    const barra = document.getElementById("barra");
+    const btn = document.getElementById("btn-continuar");
+
+    if (!uid || !tarea || !goto) {
+      document.body.innerHTML = "<h2>⚠️ Error: Faltan parámetros en el enlace.</h2>";
+      throw new Error("Parámetros incompletos.");
+    }
+
+    // Guardar paso
+    const registrarPaso = async () => {
+      try {
+        const logId = `${uid}_${tarea}_${Date.now()}`;
+        const logRef = doc(db, "visitasTareas", logId);
+        await setDoc(logRef, {
+          uid,
+          tarea,
+          destino: goto,
+          timestamp: new Date(),
+          userAgent: navigator.userAgent
+        });
+      } catch (err) {
+        console.error("Error registrando paso:", err);
+      }
+    };
+
+    registrarPaso();
+
+    // Animar barra de progreso
+    let progreso = 0;
+    const interval = setInterval(() => {
+      progreso += 6.66;
+      barra.style.width = `${progreso}%`;
+      if (progreso >= 100) {
+        clearInterval(interval);
+        btn.style.display = "inline-block";
+      }
+    }, 1000);
+
+    btn.addEventListener("click", () => {
+      window.location.href = goto;
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>🎯 Estás a punto de ganar TqC</h1>
+  </header>
+
+  <div class="contenedor">
+    <p>Esperá unos segundos y hacé clic para continuar a tu tarea</p>
+    <div class="progreso"><div class="barra" id="barra"></div></div>
+    <button id="btn-continuar" class="btn-continuar">👉 Ir al perfil del comercio</button>
+
+    <div class="ads-placeholder">
+      [ Espacio para tu publicidad o mensaje ]
+    </div>
+  </div>
+</body>
+</html>
