@@ -151,7 +151,9 @@ container.addEventListener("click", async (e) => {
   });
 
   // Abrir link
-  window.open(link, "_blank");
+const landingUrl = `https://TU_DOMINIO.com/landing.html?uid=${usuarioActual.uid}&tarea=${tareaId}&goto=${encodeURIComponent(link)}`;
+window.open(landingUrl, "_blank");
+
 
   let tiempoRestante = 60;
   const originalText = button.textContent;
