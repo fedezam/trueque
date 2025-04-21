@@ -87,20 +87,8 @@
   </style>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_AUTH_DOMAIN",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_BUCKET",
-      messagingSenderId: "TU_MSG_SENDER_ID",
-      appId: "TU_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    import { db } from "./firebase-config.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
     const params = new URLSearchParams(window.location.search);
     const uid = params.get("uid");
@@ -115,7 +103,6 @@
       throw new Error("Parámetros incompletos.");
     }
 
-    // Guardar paso
     const registrarPaso = async () => {
       try {
         const logId = `${uid}_${tarea}_${Date.now()}`;
@@ -134,13 +121,12 @@
 
     registrarPaso();
 
-    // Animar barra de progreso
     let progreso = 0;
-    const interval = setInterval(() => {
+    const intervalo = setInterval(() => {
       progreso += 6.66;
       barra.style.width = `${progreso}%`;
       if (progreso >= 100) {
-        clearInterval(interval);
+        clearInterval(intervalo);
         btn.style.display = "inline-block";
       }
     }, 1000);
@@ -166,3 +152,4 @@
   </div>
 </body>
 </html>
+
