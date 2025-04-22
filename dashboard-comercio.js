@@ -73,67 +73,60 @@ import { auth, db } from "./firebase-config.js";
  }
  
  form.addEventListener("submit", async (e) => {
-   e.preventDefault();
-   const inputs = document.querySelectorAll(".link-input");
-   const nuevasTareas = [];
- 
-   inputs.forEach((input) => {
-     const link = input.value.trim();
-     if (link) {
-   for (const input of inputs) {
-     const linkOriginal = input.value.trim();
-     if (!linkOriginal) continue;
- 
-     const tareaId = `tarea-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-     const uid = comercioDocRef.id;
- 
-     // 1. Armar el enlace a tu landing
-     const landingLink = `https://fedezam.github.io/trueque/landing.html?uid=${uid}&tarea=${tareaId}&goto=${encodeURIComponent(linkOriginal)}`;
- 
-     // 2. Acortar usando exe.io
-     const apiToken = "4446a335688e1513087b9fba35013abdb22c53aa";
-     const exeUrl = `https://exe.io/api?api=${apiToken}&url=${encodeURIComponent(landingLink)}&format=text`;
- 
-     try {
-       const res = await fetch(exeUrl);
-       const linkAcortado = await res.text();
- 
-       nuevasTareas.push({
-         id: `tarea-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-         link,
-         recompensa: null,
-         id: tareaId,
-         linkOriginal,
-         link: linkAcortado,
-         recompensa: 1,
-         timestamp: Date.now()
-       });
- 
-     } catch (err) {
-       console.error("Error generando link acortado:", err);
-       estadoGuardado.textContent = "❌ Error al generar uno de los enlaces.";
-       return;
-     }
-   });
-   }
- 
-   if (nuevasTareas.length === 0) {
-     estadoGuardado.textContent = "❗ Ingresá al menos un nuevo link válido.";
-     return;
-   }
- 
-   const nuevasTasksFinales = [...tareasExistentes, ...nuevasTareas].slice(0, MAX_TAREAS);
- 
-   try {
-     await updateDoc(comercioDocRef, { tasks: nuevasTasksFinales });
-     estadoGuardado.textContent = "✅ Nuevas tareas guardadas correctamente.";
-     location.reload();
-   } catch (err) {
-     console.error("Error al guardar nuevas tareas:", err);
-     estadoGuardado.textContent = "❌ Error al guardar nuevas tareas.";
-   }
- });
- 
+  e.preventDefault();
+  const inputs = document.querySelectorAll(".link-input");
+  const nuevasTareas = [];
+
+  for (const input of inputs) {
+    const linkOriginal = input.value.trim();
+    if (!linkOriginal) continue;
+
+    const tareaId = `tarea-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const uid = comercioDocRef.id;
+
+    // 1. Armar el enlace a tu landing
+    const landingLink = `https://fedezam.github.io/trueque/landing.html?uid=${uid}&tarea=${tareaId}&goto=${encodeURIComponent(linkOriginal)}`;
+
+    // 2. Acortar usando exe.io
+    const apiToken = "4446a335688e1513087b9fba35013abdb22c53aa";
+    const exeUrl = `https://exe.io/api?api=${apiToken}&url=${encodeURIComponent(landingLink)}&format=text`;
+
+    try {
+      const res = await fetch(exeUrl);
+      const linkAcortado = await res.text();
+
+      nuevasTareas.push({
+        id: tareaId,
+        link: linkAcortado,
+        recompensa: 1,
+        linkOriginal,
+        timestamp: Date.now()
+      });
+
+    } catch (err) {
+      console.error("Error generando link acortado:", err);
+      estadoGuardado.textContent = "❌ Error al generar uno de los enlaces.";
+      return;
+    }
+  }
+
+  if (nuevasTareas.length === 0) {
+    estadoGuardado.textContent = "❗ Ingresá al menos un nuevo link válido.";
+    return;
+  }
+
+  const nuevasTasksFinales = [...tareasExistentes, ...nuevasTareas].slice(0, MAX_TAREAS);
+
+  try {
+    await updateDoc(comercioDocRef, { tasks: nuevasTasksFinales });
+    estadoGuardado.textContent = "✅ Nuevas tareas guardadas correctamente.";
+    location.reload();
+  } catch (err) {
+    console.error("Error al guardar nuevas tareas:", err);
+    estadoGuardado.textContent = "❌ Error al guardar nuevas tareas.";
+  }
+});
+
  
  // Cerrar sesión
  document.getElementById("cerrar-sesion").addEventListener("click", async () => {
