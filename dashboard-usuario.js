@@ -141,7 +141,6 @@ container.addEventListener("click", async (e) => {
 
   if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
 
-  // Desactivar todos los botones
   const botones = document.querySelectorAll(".btn-tarea");
   botones.forEach(btn => {
     btn.disabled = true;
@@ -150,10 +149,7 @@ container.addEventListener("click", async (e) => {
     }
   });
 
-  // Abrir link
-window.open(link, "_blank");
-
-
+  window.open(link, "_blank");
 
   let tiempoRestante = 60;
   const originalText = button.textContent;
@@ -183,7 +179,6 @@ window.open(link, "_blank");
 
       const saldoActual = tqcPorComercio[comercioUid] || 0;
       const nuevoSaldo = saldoActual + recompensa;
-
       tareas.push({ comercioUid, tareaId });
 
       await updateDoc(userRef, {
@@ -194,28 +189,35 @@ window.open(link, "_blank");
 
       clearInterval(intervalo);
 
-      // Eliminar la tarea del DOM
       const card = button.closest(".tarea-card");
-      if (card) card.remove();
+      if (card) {
+        card.style.backgroundColor = "#d4edda";
+        card.innerHTML = "<p>✅ Tarea completada. ¡Felicitaciones!</p>";
+        setTimeout(() => card.remove(), 2000);
+      }
 
-      // Reactivar los botones restantes
       document.querySelectorAll(".btn-tarea").forEach(btn => {
         btn.disabled = false;
         btn.textContent = "Realizar tarea";
       });
 
+      tqcBalance.textContent = `Tienes (${nuevoSaldo + Object.values(tqcPorComercio).filter((_, key) => key !== comercioUid).reduce((sum, val) => sum + val, 0)}) TqC`;
+
       tareaEnCurso = false;
     }
-  }, 60000); // 60 segundos reales
+  }, 60000);
 });
-
 
 // Cerrar sesión
-document.getElementById("cerrar-sesion").addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    window.location.href = "registro.html";
-  } catch (err) {
-    console.error("Error al cerrar sesión:", err);
-  }
-});
+
+const cerrarSesionBtn = document.getElementById("cerrar-sesion");
+if (cerrarSesionBtn) {
+  cerrarSesionBtn.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "registro.html";
+    } catch (err) {
+      console.error("Error al cerrar sesión:", err);
+    }
+  });
+}
