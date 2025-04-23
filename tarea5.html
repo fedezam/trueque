@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarea TQC - Comercio X</title>
+  <!-- Simulación de AdSense -->
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    header, footer {
+      background-color: #0077cc;
+      color: white;
+      text-align: center;
+      padding: 1em;
+    }
+    .contenido {
+      padding: 1.5em;
+      max-width: 600px;
+      margin: auto;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 1em;
+    }
+    .ads {
+      margin: 20px 0;
+      background: #eee;
+      padding: 10px;
+      text-align: center;
+    }
+    #continuar {
+      display: none;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #temporizador {
+      font-weight: bold;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TruequeCoin | Tarea del Día</h1>
+  </header>
+
+  <div class="contenido">
+    <p><strong>Comercio participante:</strong> Verdulería El Progreso</p>
+    <h2>¿Por qué comer frutas de estación?</h2>
+    <p>Las frutas de estación no solo son más económicas, sino que también tienen mejor sabor y aportan mayores nutrientes. En otoño, por ejemplo, destacan los cítricos como la naranja y la mandarina.</p>
+
+    <div class="ads">
+      [Aquí iría un anuncio de Google AdSense]
+    </div>
+
+    <p>Además de cuidar tu salud, estás apoyando al comercio local y colaborando con una economía más justa y sustentable. ¿Sabías que al consumir frutas de estación se reduce el impacto ambiental?</p>
+
+    <div class="ads">
+      [Banner afiliado o producto recomendado]
+    </div>
+
+    <p id="temporizador">Esperá 30 segundos para continuar...</p>
+    <button id="continuar">Continuar a la tarea</button>
+  </div>
+
+  <footer>
+    <p>TruequeCoin - Comunidad, colaboración y tecnología</p>
+  </footer>
+
+  <script>
+    // Temporizador para mostrar el botón después de 30s
+    let segundos = 30;
+    const timer = document.getElementById("temporizador");
+    const boton = document.getElementById("continuar");
+
+    const intervalo = setInterval(() => {
+      segundos--;
+      timer.textContent = `Esperá ${segundos} segundos para continuar...`;
+
+      if (segundos <= 0) {
+        clearInterval(intervalo);
+        timer.textContent = "¡Listo! Podés continuar.";
+        boton.style.display = "block";
+      }
+    }, 1000);
+
+    boton.addEventListener("click", () => {
+      // Redirección a landing con parámetros (ejemplo)
+      const uid = "comercio123";
+      const tarea = "tarea456";
+      const goto = encodeURIComponent("https://www.facebook.com/VerduleriaElProgreso");
+      window.location.href = `landing.html?uid=${uid}&tarea=${tarea}&goto=${goto}`;
+    });
+  </script>
+</body>
+</html>
