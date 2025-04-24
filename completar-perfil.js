@@ -18,11 +18,13 @@ document.getElementById('hijos').addEventListener('change', (e) => {
 });
 
 // Cargar provincias y localidades
+let localidadesGlobal = [];
+
 fetch('localidades.json')
   .then(res => res.json())
   .then(data => {
-    const localidades = data.localidades_censales;
-    const provincias = [...new Set(localidades.map(loc => loc.provincia.nombre))];
+    localidadesGlobal = data.localidades_censales;
+    const provincias = [...new Set(localidadesGlobal.map(loc => loc.provincia.nombre))];
     provincias.sort().forEach(prov => {
       const option = document.createElement('option');
       option.value = prov;
@@ -33,7 +35,7 @@ fetch('localidades.json')
     provinciasSelect.addEventListener('change', () => {
       const seleccion = provinciasSelect.value;
       localidadesSelect.innerHTML = '<option value="">Seleccioná una localidad</option>';
-      localidades
+      localidadesGlobal
         .filter(loc => loc.provincia.nombre === seleccion)
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
         .forEach(loc => {
@@ -45,7 +47,7 @@ fetch('localidades.json')
     });
   });
 
-// Lógica principal
+// Verificar sesión y cargar datos
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert('Debés iniciar sesión primero.');
@@ -59,23 +61,38 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      document.getElementById('nombre').value = data.nombre || '';
-      document.getElementById('apellido').value = data.apellido || '';
-      document.getElementById('telefono').value = data.telefono || '';
-      document.getElementById('edad').value = data.edad || '';
-      document.getElementById('formacion-academica').value = data.formacion || '';
-      document.getElementById('trabajo').value = data.trabajo || '';
-      document.getElementById('ecivil').value = data.ecivil || '';
-      document.getElementById('hijos').value = data.hijos || '';
-      if (data.hijos === 'si' && data.cantidadHijos) {
-        cantidadHijosDiv.style.display = 'block';
-        cantidadHijosInput.value = data.cantidadHijos;
-      }
+
+    if (!docSnap.exists()) {
+      alert('Tu cuenta no está completamente registrada. Volvé a registrarte.');
+      return window.location.href = 'registro.html';
     }
+
+    const data = docSnap.data();
+    document.getElementById('nombre').value = data.nombre || '';
+    document.getElementById('apellido').value = data.apellido || '';
+    document.getElementById('telefono').value = data.telefono || '';
+    document.getElementById('edad').value = data.edad || '';
+    document.getElementById('formacion-academica').value = data.formacion || '';
+    document.getElementById('trabajo').value = data.trabajo || '';
+    document.getElementById('ecivil').value = data.ecivil || '';
+    document.getElementById('hijos').value = data.hijos || '';
+
+    if (data.hijos === 'si' && data.cantidadHijos) {
+      cantidadHijosDiv.style.display = 'block';
+      cantidadHijosInput.value = data.cantidadHijos;
+    }
+
+    if (data.provincia) {
+      provinciasSelect.value = data.provincia;
+      provinciasSelect.dispatchEvent(new Event('change'));
+      setTimeout(() => {
+        localidadesSelect.value = data.localidad || '';
+      }, 500); // Esperar a que carguen localidades
+    }
+
   } catch (err) {
     console.error('Error al obtener datos del perfil:', err);
+    alert('Error al cargar el perfil.');
   }
 
   form.addEventListener('submit', async (e) => {
