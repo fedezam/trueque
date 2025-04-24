@@ -2,37 +2,62 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registrar Comercio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completar Perfil - Comercio</title>
   <link rel="stylesheet" href="styles.css" />
   <script type="module" src="completar-perfil-comercio.js" defer></script>
 </head>
 <body>
-  <h1>Registrar un nuevo comercio</h1>
+  <h1>Completar Perfil - Comercio</h1>
 
-  <form id="form-comercio">
-    <label for="nombre-comercio">Nombre del Comercio:</label>
-    <input type="text" id="nombre-comercio" required />
+  <form id="completar-perfil-form">
+    <!-- DATOS PERSONALES -->
+    <fieldset>
+      <legend>👤 Datos personales</legend>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" required />
 
-    <label for="direccion">Dirección:</label>
-    <input type="text" id="direccion" required />
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" required />
 
-    <label for="telefono">Teléfono del Comercio:</label>
-    <input type="tel" id="telefono" required />
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" required />
 
-    <label for="rubro">Rubro:</label>
-    <input type="text" id="rubro" required />
+      <label for="edad">Edad:</label>
+      <select id="edad" required>
+        <option value="">Seleccioná tu edad</option>
+        <option value="-18">Menos de 18</option>
+        <option value="18-25">18 a 25</option>
+        <option value="26-35">26 a 35</option>
+        <option value="36-45">36 a 45</option>
+        <option value="46-60">46 a 60</option>
+        <option value="60+">Más de 60</option>
+      </select>
+    </fieldset>
 
-    <label for="provincia">Provincia:</label>
-    <select id="provincia" required></select>
+    <!-- DATOS DEL COMERCIO -->
+    <fieldset>
+      <legend>🏪 Datos del comercio</legend>
+      <label for="nombre-comercio">Nombre del comercio:</label>
+      <input type="text" id="nombre-comercio" required />
 
-    <label for="localidad">Localidad:</label>
-    <select id="localidad" required></select>
+      <label for="direccion-comercio">Dirección:</label>
+      <input type="text" id="direccion-comercio" required />
 
-    <label for="redes">Redes Sociales (opcional):</label>
-    <input type="text" id="redes" placeholder="Instagram, Facebook, etc" />
+      <label for="provincia">Provincia:</label>
+      <select id="provincia" required></select>
 
-    <button type="submit">Guardar comercio</button>
+      <label for="localidad">Localidad:</label>
+      <select id="localidad" required></select>
+
+      <label for="rubro">Rubro del comercio:</label>
+      <input type="text" id="rubro" required />
+
+      <label for="redes">Redes sociales:</label>
+      <input type="url" id="redes" placeholder="https://instagram.com/ejemplo" />
+    </fieldset>
+
+    <button type="submit">Guardar perfil y comercio</button>
   </form>
 </body>
 </html>
