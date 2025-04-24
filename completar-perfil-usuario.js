@@ -116,7 +116,7 @@ onAuthStateChanged(auth, async (user) => {
     try {
       await setDoc(docRef, perfilActualizado, { merge: true });
       alert('Perfil guardado correctamente.');
-      window.location.href = dashboardDestino;
+      window.location.href = dashboard-usuario.html;
     } catch (err) {
       console.error('Error al guardar perfil:', err);
       alert('Error al guardar el perfil.');
