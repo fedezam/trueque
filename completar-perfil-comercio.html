@@ -10,18 +10,18 @@
 <body>
   <h1>Registrar un nuevo comercio</h1>
 
-  <form id="comercio-form">
-    <label for="nombreComercio">Nombre del comercio:</label>
-    <input type="text" id="nombreComercio" required>
+  <form id="form-comercio">
+    <label for="nombre-comercio">Nombre del Comercio:</label>
+    <input type="text" id="nombre-comercio" required />
 
     <label for="direccion">Dirección:</label>
-    <input type="text" id="direccion" required>
+    <input type="text" id="direccion" required />
 
-    <label for="telefonoComercio">Teléfono del comercio:</label>
-    <input type="tel" id="telefonoComercio" required>
+    <label for="telefono">Teléfono del Comercio:</label>
+    <input type="tel" id="telefono" required />
 
     <label for="rubro">Rubro:</label>
-    <input type="text" id="rubro" placeholder="Ej: Indumentaria, Alimentos, etc." required>
+    <input type="text" id="rubro" required />
 
     <label for="provincia">Provincia:</label>
     <select id="provincia" required></select>
@@ -29,16 +29,10 @@
     <label for="localidad">Localidad:</label>
     <select id="localidad" required></select>
 
-    <label for="facebook">Facebook:</label>
-    <input type="url" id="facebook">
+    <label for="redes">Redes Sociales (opcional):</label>
+    <input type="text" id="redes" placeholder="Instagram, Facebook, etc" />
 
-    <label for="instagram">Instagram:</label>
-    <input type="url" id="instagram">
-
-    <label for="descripcion">Descripción del comercio:</label>
-    <textarea id="descripcion" rows="3"></textarea>
-
-    <button type="submit">Registrar comercio</button>
+    <button type="submit">Guardar comercio</button>
   </form>
 </body>
 </html>
