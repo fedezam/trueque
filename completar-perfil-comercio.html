@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar Comercio</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="completar-perfil-comercio.js" defer></script>
+</head>
+<body>
+  <h1>Registrar un nuevo comercio</h1>
+
+  <form id="comercio-form">
+    <label for="nombreComercio">Nombre del comercio:</label>
+    <input type="text" id="nombreComercio" required>
+
+    <label for="direccion">Dirección:</label>
+    <input type="text" id="direccion" required>
+
+    <label for="telefonoComercio">Teléfono del comercio:</label>
+    <input type="tel" id="telefonoComercio" required>
+
+    <label for="rubro">Rubro:</label>
+    <input type="text" id="rubro" placeholder="Ej: Indumentaria, Alimentos, etc." required>
+
+    <label for="provincia">Provincia:</label>
+    <select id="provincia" required></select>
+
+    <label for="localidad">Localidad:</label>
+    <select id="localidad" required></select>
+
+    <label for="facebook">Facebook:</label>
+    <input type="url" id="facebook">
+
+    <label for="instagram">Instagram:</label>
+    <input type="url" id="instagram">
+
+    <label for="descripcion">Descripción del comercio:</label>
+    <textarea id="descripcion" rows="3"></textarea>
+
+    <button type="submit">Registrar comercio</button>
+  </form>
+</body>
+</html>
