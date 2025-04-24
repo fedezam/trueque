@@ -25,7 +25,7 @@ let tareaEnCurso = false;
 onAuthStateChanged(auth, async (user) => {
   if (!user || !user.uid) {
     alert("No has iniciado sesión.");
-    window.location.href = "registro.html";
+    window.location.href = "login.html";
     return;
   }
 
