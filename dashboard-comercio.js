@@ -24,7 +24,7 @@ const RECOMPENSA_PREDETERMINADA = 1;
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("No has iniciado sesión.");
-    window.location.href = "registro.html";
+    window.location.href = "login.html";
     return;
   }
 
