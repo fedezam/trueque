@@ -21,7 +21,7 @@ const estadoGuardado = document.getElementById("estado-guardado");
 let comercioDocRef = null;
 let tareasExistentes = [];
 const MAX_TAREAS = 10;
-const TIEMPO_VIDA_MS = 5 * 24 * 60 * 60 * 1000; // 5 días
+const TIEMPO_VIDA_MS = 5 * 24 * 60 * 60 * 1000;
 const RECOMPENSA_PREDETERMINADA = 1;
 
 onAuthStateChanged(auth, async (user) => {
@@ -61,11 +61,23 @@ function mostrarCamposTareas(tareasActivas) {
   });
 
   const espaciosLibres = MAX_TAREAS - tareasActivas.length;
+
   for (let i = 0; i < espaciosLibres; i++) {
     const input = document.createElement("input");
     input.type = "url";
-    input.placeholder = `Nuevo link (${i + 1})`;
     input.classList.add("link-input");
+
+    if (i === 0) {
+      input.placeholder = "🔗 Ingresá el perfil de tu comercio en Google Maps";
+      const desc = document.createElement("p");
+      desc.textContent = "💡 Consejo: Añadí aquí tu link de Google Maps para que tus clientes te encuentren más fácilmente y mejorar tu visibilidad local.";
+      desc.style.fontStyle = "italic";
+      desc.style.fontSize = "0.9em";
+      camposContainer.appendChild(desc);
+    } else {
+      input.placeholder = `Nuevo link (${i + 1})`;
+    }
+
     camposContainer.appendChild(input);
   }
 }
@@ -73,7 +85,6 @@ function mostrarCamposTareas(tareasActivas) {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const inputs = document.querySelectorAll(".link-input");
-
   const nuevasTareas = [];
 
   for (const input of inputs) {
@@ -112,4 +123,3 @@ document.getElementById("cerrar-sesion").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "registro.html";
 });
-
