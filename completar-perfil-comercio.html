@@ -1,63 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Completar Perfil - Comercio</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script type="module" src="completar-perfil-comercio.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completar Perfil - Comercio</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="completar-perfil-comercio.js" defer></script>
 </head>
 <body>
-  <h1>Completar Perfil - Comercio</h1>
+  <h1>Completar Perfil - Comercio</h1>
 
-  <form id="completar-perfil-form">
-    <!-- DATOS PERSONALES -->
-    <fieldset>
-      <legend>👤 Datos personales</legend>
-      <label for="nombre">Nombre:</label>
-      <input type="text" id="nombre" required />
+  <form id="completar-perfil-form">
+        <fieldset>
+      <legend>👤 Datos personales</legend>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" required />
 
-      <label for="apellido">Apellido:</label>
-      <input type="text" id="apellido" required />
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" required />
 
-      <label for="telefono">Teléfono:</label>
-      <input type="tel" id="telefono" required />
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" required />
 
-      <label for="edad">Edad:</label>
-      <select id="edad" required>
-        <option value="">Seleccioná tu edad</option>
-        <option value="-18">Menos de 18</option>
-        <option value="18-25">18 a 25</option>
-        <option value="26-35">26 a 35</option>
-        <option value="36-45">36 a 45</option>
-        <option value="46-60">46 a 60</option>
-        <option value="60+">Más de 60</option>
-      </select>
-    </fieldset>
+      <label for="edad">Edad:</label>
+      <select id="edad" required>
+        <option value="">Seleccioná tu edad</option>
+        <option value="-18">Menos de 18</option>
+        <option value="18-25">18 a 25</option>
+        <option value="26-35">26 a 35</option>
+        <option value="36-45">36 a 45</option>
+        <option value="46-60">46 a 60</option>
+        <option value="60+">Más de 60</option>
+      </select>
+    </fieldset>
 
-    <!-- DATOS DEL COMERCIO -->
-    <fieldset>
-      <legend>🏪 Datos del comercio</legend>
-      <label for="nombre-comercio">Nombre del comercio:</label>
-      <input type="text" id="nombre-comercio" required />
+        <fieldset>
+      <legend>🏪 Datos del comercio</legend>
+      <label for="nombre-comercio">Nombre del comercio:</label>
+      <input type="text" id="nombre-comercio" required />
 
-      <label for="direccion-comercio">Dirección:</label>
-      <input type="text" id="direccion-comercio" required />
+      <label for="direccion-comercio">Dirección:</label>
+      <input type="text" id="direccion-comercio" required />
 
-      <label for="provincia">Provincia:</label>
-      <select id="provincia" required></select>
+      <label for="provincia">Provincia:</label>
+      <select id="provincia" required></select>
 
-      <label for="localidad">Localidad:</label>
-      <select id="localidad" required></select>
+      <label for="localidad">Localidad:</label>
+      <select id="localidad" required></select>
 
-      <label for="rubro">Rubro del comercio:</label>
-      <input type="text" id="rubro" required />
+      <label for="rubro">Rubro del comercio:</label>
+      <select id="rubro" required>
+        <option value="">Seleccioná un rubro</option>
+      </select>
 
-      <label for="redes">Redes sociales:</label>
-      <input type="url" id="redes" placeholder="https://instagram.com/ejemplo" />
-    </fieldset>
+      <label for="redes">Redes sociales:</label>
+      <input type="url" id="redes" placeholder="https://instagram.com/ejemplo" />
+    </fieldset>
 
-    <button type="submit">Guardar perfil y comercio</button>
-  </form>
+    <button type="submit">Guardar perfil y comercio</button>
+  </form>
 </body>
 </html>
