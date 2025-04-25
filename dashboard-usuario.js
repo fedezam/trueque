@@ -1,4 +1,5 @@
 import { verificarSesion } from './verificar-sesion.js';
+verificarSesion();
 import { auth, db } from "./firebase-config.js";
 import {
   signOut
