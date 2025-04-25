@@ -46,16 +46,20 @@ fetch('localidades.json')
     });
   });
 
-// Cargar rubros desde rubros.json
+// Cargar rubros desde rubros.json (nueva lógica para tu formato)
 fetch('rubros.json')
   .then(res => res.json())
   .then(data => {
-    data.rubros.sort().forEach(rubro => {
-      const option = document.createElement('option');
-      option.value = rubro; // Puedes usar el mismo nombre como valor
-      option.textContent = rubro;
-      rubroSelect.appendChild(option);
-    });
+    if (data && data.rubros_comerciales_principales) {
+      data.rubros_comerciales_principales.sort((a, b) => a.rubro.localeCompare(b.rubro)).forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.rubro; // Usamos el nombre del rubro como valor
+        option.textContent = item.rubro;
+        rubroSelect.appendChild(option);
+      });
+    } else {
+      console.error('El archivo rubros.json no tiene la estructura esperada.');
+    }
   })
   .catch(error => {
     console.error('Error al cargar los rubros:', error);
