@@ -1,9 +1,8 @@
 import { auth, db, googleProvider } from './firebase-config.js';
 import {
   createUserWithEmailAndPassword,
-  signInWithPopup,
+  signInWithPopup
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
-
 import {
   doc,
   setDoc,
@@ -96,7 +95,11 @@ form.addEventListener('submit', async (e) => {
 
     guardarTipoCuentaEnLocal();
     alert('Registro exitoso.');
-    window.location.href = 'completar-perfil.html';
+
+    const destino = tipoCuenta === 'usuario'
+      ? 'completar-perfil-usuario.html'
+      : 'completar-perfil-comercio.html';
+    window.location.href = destino;
 
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -145,7 +148,11 @@ googleLoginBtn.addEventListener('click', async () => {
 
     guardarTipoCuentaEnLocal();
     alert('Sesión iniciada con Google.');
-    window.location.href = 'completar-perfil.html';
+
+    const destino = tipoCuenta === 'usuario'
+      ? 'completar-perfil-usuario.html'
+      : 'completar-perfil-comercio.html';
+    window.location.href = destino;
 
   } catch (error) {
     console.error(error);
