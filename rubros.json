@@ -2,176 +2,75 @@
   "rubros_comerciales_principales": [
     {
       "rubro": "Alimentos y Bebidas",
-      "ejemplos": [
-        "Supermercados",
-        "Carnicerías",
-        "Verdulerías",
-        "Panaderías",
-        "Restaurantes",
-        "Bares",
-        "Cafeterías"
-      ]
+      "ejemplos": ["Supermercados", "Carnicerías", "Verdulerías", "Panaderías", "Restaurantes", "Bares", "Cafeterías"]
     },
     {
       "rubro": "Salud",
-      "ejemplos": [
-        "Farmacias",
-        "Médicos (consultorios)",
-        "Odontólogos",
-        "Laboratorios de Análisis Clínicos",
-        "Ópticas"
-      ]
+      "ejemplos": ["Farmacias", "Médicos (consultorios)", "Odontólogos", "Laboratorios de Análisis Clínicos", "Ópticas"]
     },
     {
       "rubro": "Indumentaria y Calzado",
-      "ejemplos": [
-        "Tiendas de ropa (mujer, hombre, niños)",
-        "Zapaterías",
-        "Lencerías",
-        "Tiendas de ropa deportiva"
-      ]
+      "ejemplos": ["Tiendas de ropa", "Zapaterías", "Lencerías", "Ropa deportiva"]
     },
     {
       "rubro": "Hogar y Construcción",
-      "ejemplos": [
-        "Ferreterías",
-        "Tiendas de muebles",
-        "Electrodomésticos",
-        "Materiales de construcción",
-        "Pinturerías"
-      ]
+      "ejemplos": ["Ferreterías", "Mueblerías", "Electrodomésticos", "Materiales de construcción", "Pinturerías"]
     },
     {
       "rubro": "Servicios Personales",
-      "ejemplos": [
-        "Peluquerías",
-        "Barberías",
-        "Centros de estética",
-        "Gimnasios"
-      ]
+      "ejemplos": ["Peluquerías", "Barberías", "Estética", "Gimnasios"]
     },
     {
       "rubro": "Educación y Librería",
-      "ejemplos": [
-        "Librerías",
-        "Papelerías",
-        "Academias",
-        "Jugueterías didácticas"
-      ]
+      "ejemplos": ["Librerías", "Papelerías", "Academias", "Jugueterías didácticas"]
     },
     {
       "rubro": "Automotores",
-      "ejemplos": [
-        "Talleres mecánicos",
-        "Gomerías",
-        "Lavaderos de autos",
-        "Repuestos"
-      ]
+      "ejemplos": ["Talleres mecánicos", "Gomerías", "Lavaderos de autos", "Repuestos"]
     },
     {
       "rubro": "Bancos y Servicios Financieros",
-      "ejemplos": [
-        "Sucursales bancarias",
-        "Cajeros automáticos"
-      ]
+      "ejemplos": ["Sucursales bancarias", "Cajeros automáticos"]
     },
     {
       "rubro": "Servicios Profesionales",
-      "ejemplos": [
-        "Abogados",
-        "Contadores",
-        "Arquitectos",
-        "Escribanos"
-      ]
+      "ejemplos": ["Abogados", "Contadores", "Arquitectos", "Escribanos"]
     },
     {
       "rubro": "Esparcimiento y Cultura",
-      "ejemplos": [
-        "Cines",
-        "Teatros",
-        "Museos",
-        "Heladerías",
-        "Salones de eventos"
-      ]
+      "ejemplos": ["Cines", "Teatros", "Museos", "Heladerías", "Eventos"]
     },
     {
       "rubro": "Productos Naturales y Artesanales",
-      "ejemplos": [
-        "Herboristerías",
-        "Tienda natural",
-        "Productos sin TACC",
-        "Artesanías",
-        "Cosmética natural"
-      ]
+      "ejemplos": ["Herboristerías", "Tienda natural", "Artesanías", "Cosmética natural"]
     },
     {
       "rubro": "Venta Ambulante y Ferias",
-      "ejemplos": [
-        "Venta callejera",
-        "Puestos en ferias",
-        "Ferias americanas",
-        "Puestos de mercado"
-      ]
+      "ejemplos": ["Venta callejera", "Ferias americanas", "Puestos de mercado"]
     },
     {
       "rubro": "Gastronomía Casera",
-      "ejemplos": [
-        "Venta de empanadas",
-        "Tortas por encargo",
-        "Pastelería casera",
-        "Viandas saludables",
-        "Catering informal"
-      ]
+      "ejemplos": ["Venta de empanadas", "Tortas", "Pastelería", "Viandas", "Catering"]
     },
     {
       "rubro": "Servicios Manuales y Reparaciones",
-      "ejemplos": [
-        "Plomería",
-        "Electricidad",
-        "Gasista",
-        "Pintor",
-        "Carpintería",
-        "Herrería"
-      ]
+      "ejemplos": ["Plomería", "Electricidad", "Gasista", "Carpintería", "Herrería"]
     },
     {
       "rubro": "Cuidado Familiar",
-      "ejemplos": [
-        "Niñeras",
-        "Cuidadores de ancianos",
-        "Acompañantes terapéuticos",
-        "Clases de apoyo escolar"
-      ]
+      "ejemplos": ["Niñeras", "Cuidadores", "Acompañantes terapéuticos", "Clases particulares"]
     },
     {
       "rubro": "Envíos y Mensajería",
-      "ejemplos": [
-        "Delivery independiente",
-        "Mensajería urbana",
-        "Moto mensajeros",
-        "Cadetería"
-      ]
+      "ejemplos": ["Delivery", "Mensajería urbana", "Cadetería"]
     },
     {
       "rubro": "Servicios Digitales",
-      "ejemplos": [
-        "Diseño gráfico",
-        "Marketing digital",
-        "Desarrollo web",
-        "Gestión de redes sociales",
-        "Edición de video"
-      ]
+      "ejemplos": ["Diseño gráfico", "Marketing digital", "Desarrollo web", "Gestión de redes"]
     },
     {
       "rubro": "Mascotas y Veterinaria",
-      "ejemplos": [
-        "Veterinarias",
-        "Peluquería canina",
-        "Tiendas de mascotas",
-        "Paseadores",
-        "Refugios de animales",
-        "Guarderías para perros"
-      ]
+      "ejemplos": ["Veterinarias", "Peluquería canina", "Tiendas de mascotas", "Paseadores"]
     }
   ]
 }
