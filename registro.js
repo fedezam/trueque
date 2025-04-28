@@ -9,47 +9,52 @@ import {
   getDoc
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 
+// Elementos HTML
 const form = document.getElementById('registro-form');
 const googleLoginBtn = document.getElementById('google-login');
 
-// Mostrar contraseña
+// Mostrar / ocultar contraseña
 document.getElementById('mostrar-contrasena')?.addEventListener('change', (e) => {
   const tipo = e.target.checked ? 'text' : 'password';
   document.getElementById('password').type = tipo;
   document.getElementById('confirm-password').type = tipo;
 });
 
-// Validación de contraseña segura
+// Validación básica de contraseña segura
 const validarPassword = (password) => {
   const tieneMayuscula = /[A-Z]/.test(password);
   const tieneEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
   return password.length >= 6 && tieneMayuscula && tieneEspecial;
 };
 
-// Leer código de referido desde la URL
+// Leer parámetros de la URL (código de referido)
 const params = new URLSearchParams(window.location.search);
 const referidoPor = params.get('ref') || null;
 
-// Obtener tipo de cuenta
+// Variable para almacenar el tipo de cuenta seleccionado
 let tipoCuenta = null;
+
+// Detectar el tipo de cuenta elegido
 document.querySelectorAll('input[name="tipo-cuenta"]').forEach((input) => {
   input.addEventListener('change', (e) => {
     tipoCuenta = e.target.value;
   });
 });
 
-// Generador de código de referido
+// Función para generar un código de referido único
 function generarCodigoReferido() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
-// Guardar datos mínimos en localStorage
+// Guardar tipo de cuenta en localStorage para usarlo después
 function guardarTipoCuentaEnLocal() {
   localStorage.setItem('tipoCuenta', tipoCuenta);
 }
 
-// Registro con formulario
+// 🧠 FUNCIONES PRINCIPALES:
+
+// Registro normal por formulario
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -79,34 +84,61 @@ form.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const coleccion = tipoCuenta === 'usuario' ? 'usuarios' : 'comercios';
-    await setDoc(doc(db, coleccion, user.uid), {
-      nombre,
-      apellido,
-      email,
-      telefono,
-      uid: user.uid,
-      registradoCon: 'formulario',
-      referidoPor,
-      codigoReferido: generarCodigoReferido(),
-      creadoEn: new Date().toISOString(),
-      completadoPerfil: false
-    });
+    if (tipoCuenta === 'usuario') {
+      // Guardar en colección "usuarios"
+      await setDoc(doc(db, 'usuarios', user.uid), {
+        nombre,
+        apellido,
+        email,
+        telefono,
+        uid: user.uid,
+        registradoCon: 'formulario',
+        referidoPor,
+        codigoReferido: generarCodigoReferido(),
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
+      });
+    } else if (tipoCuenta === 'comercio') {
+      // Guardar en colección "usuariosComercio"
+      await setDoc(doc(db, 'usuariosComercio', user.uid), {
+        nombre,
+        apellido,
+        email,
+        telefono,
+        uid: user.uid,
+        registradoCon: 'formulario',
+        referidoPor,
+        codigoReferido: generarCodigoReferido(),
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
+      });
+
+      // Crear documento vacío inicial en "comercios"
+      await setDoc(doc(db, 'comercios', user.uid), {
+        ownerUid: user.uid,
+        nombreComercio: '',
+        direccion: '',
+        provincia: '',
+        localidad: '',
+        rubro: '',
+        redes: '',
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
+      });
+    }
 
     guardarTipoCuentaEnLocal();
     alert('Registro exitoso.');
-
-    const destino = tipoCuenta === 'usuario'
+    window.location.href = tipoCuenta === 'usuario'
       ? 'completar-perfil-usuario.html'
       : 'completar-perfil-comercio.html';
-    window.location.href = destino;
 
   } catch (error) {
+    console.error(error);
     if (error.code === 'auth/email-already-in-use') {
       alert('Este correo ya está en uso.');
     } else {
-      console.error(error);
-      alert('Error al registrarse.');
+      alert('Error al registrarse. Intenta nuevamente.');
     }
   }
 });
@@ -114,7 +146,7 @@ form.addEventListener('submit', async (e) => {
 // Registro con Google
 googleLoginBtn.addEventListener('click', async () => {
   if (!tipoCuenta) {
-    alert('Debés seleccionar un tipo de cuenta.');
+    alert('Debés seleccionar un tipo de cuenta antes de continuar.');
     return;
   }
 
@@ -122,17 +154,13 @@ googleLoginBtn.addEventListener('click', async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    const coleccion = tipoCuenta === 'usuario' ? 'usuarios' : 'comercios';
-    const docRef = doc(db, coleccion, user.uid);
-    const docSnap = await getDoc(docRef);
+    const nombreCompleto = user.displayName || '';
+    const [nombre = '', ...resto] = nombreCompleto.split(' ');
+    const apellido = resto.join(' ') || '';
+    const telefono = user.phoneNumber || '';
 
-    if (!docSnap.exists()) {
-      const nombreCompleto = user.displayName || '';
-      const [nombre = '', ...resto] = nombreCompleto.split(' ');
-      const apellido = resto.join(' ') || '';
-      const telefono = user.phoneNumber || '';
-
-      await setDoc(docRef, {
+    if (tipoCuenta === 'usuario') {
+      await setDoc(doc(db, 'usuarios', user.uid), {
         nombre,
         apellido,
         email: user.email,
@@ -144,18 +172,41 @@ googleLoginBtn.addEventListener('click', async () => {
         creadoEn: new Date().toISOString(),
         completadoPerfil: false
       });
+    } else if (tipoCuenta === 'comercio') {
+      await setDoc(doc(db, 'usuariosComercio', user.uid), {
+        nombre,
+        apellido,
+        email: user.email,
+        telefono,
+        uid: user.uid,
+        registradoCon: 'google',
+        referidoPor,
+        codigoReferido: generarCodigoReferido(),
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
+      });
+
+      await setDoc(doc(db, 'comercios', user.uid), {
+        ownerUid: user.uid,
+        nombreComercio: '',
+        direccion: '',
+        provincia: '',
+        localidad: '',
+        rubro: '',
+        redes: '',
+        creadoEn: new Date().toISOString(),
+        completadoPerfil: false
+      });
     }
 
     guardarTipoCuentaEnLocal();
     alert('Sesión iniciada con Google.');
-
-    const destino = tipoCuenta === 'usuario'
+    window.location.href = tipoCuenta === 'usuario'
       ? 'completar-perfil-usuario.html'
       : 'completar-perfil-comercio.html';
-    window.location.href = destino;
 
   } catch (error) {
-    console.error(error);
+    console.error('Error con Google:', error);
     alert('Error al iniciar sesión con Google.');
   }
 });
