@@ -1,134 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Completar Perfil - Comercio | TruequeCoin</title>
-
-    <!-- Estilos generales -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- Fuente profesional Montserrat -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!-- Ícono de pestaña (opcional, pendiente agregar) -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-
-    <!-- Script principal de la página -->
-    <script type="module" src="completar-perfil-comercio.js" defer></script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completar Perfil Comercio | TruequeCoin</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+  <script type="module" src="completar-perfil-comercio.js" defer></script>
 </head>
-
 <body>
-    <main>
-        <h1>Completar Perfil - Comercio</h1>
+  <h1>Completar Perfil - Comercio</h1>
 
-        <!-- Formulario de registro de datos -->
-        <form id="completar-perfil-form">
+  <form id="completar-perfil-form">
+    <fieldset>
+      <legend>👤 Datos Personales del Comerciante</legend>
+      
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" required>
 
-            <!-- Datos Personales del Comerciante -->
-            <fieldset>
-                <legend>👤 Datos Personales</legend>
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" required>
 
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required>
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" required>
 
-                <label for="apellido">Apellido:</label>
-                <input type="text" id="apellido" name="apellido" required>
+      <label for="edad">Edad:</label>
+      <select id="edad" required>
+        <option value="">Seleccioná tu edad</option>
+        <option value="-18">Menos de 18</option>
+        <option value="18-25">18 a 25</option>
+        <option value="26-35">26 a 35</option>
+        <option value="36-45">36 a 45</option>
+        <option value="46-60">46 a 60</option>
+        <option value="60+">Más de 60</option>
+      </select>
+    </fieldset>
 
-                <label for="telefono">Teléfono:</label>
-                <input type="tel" id="telefono" name="telefono" required>
+    <fieldset>
+      <legend>🏪 Datos del Comercio</legend>
 
-                <label for="edad">Edad:</label>
-                <select id="edad" name="edad" required>
-                    <option value="">Seleccioná tu edad</option>
-                    <option value="-18">Menos de 18</option>
-                    <option value="18-25">18 a 25</option>
-                    <option value="26-35">26 a 35</option>
-                    <option value="36-45">36 a 45</option>
-                    <option value="46-60">46 a 60</option>
-                    <option value="60+">Más de 60</option>
-                </select>
+      <label for="nombre-comercio">Nombre del Comercio:</label>
+      <input type="text" id="nombre-comercio" required>
 
-                <label for="formacion-academica">Formación Académica:</label>
-                <select id="formacion-academica" name="formacion-academica">
-                    <option value="">Seleccioná una opción</option>
-                    <option value="no tiene estudios">No tiene estudios</option>
-                    <option value="primaria">Primaria</option>
-                    <option value="secundaria">Secundaria</option>
-                    <option value="terciaria">Terciaria</option>
-                    <option value="universitaria">Universitaria</option>
-                </select>
+      <label for="direccion-comercio">Dirección:</label>
+      <input type="text" id="direccion-comercio" required>
 
-                <label for="trabajo">Situación Laboral:</label>
-                <select id="trabajo" name="trabajo">
-                    <option value="">Seleccioná una opción</option>
-                    <option value="desempleado">Desempleado</option>
-                    <option value="empleado">Empleado</option>
-                    <option value="independiente">Trabajador independiente</option>
-                    <option value="comerciante">Comerciante</option>
-                    <option value="jubilado">Jubilado</option>
-                    <option value="estudiante">Estudiante</option>
-                </select>
+      <label for="provincia">Provincia:</label>
+      <select id="provincia" required></select>
 
-                <label for="ecivil">Estado Civil:</label>
-                <select id="ecivil" name="ecivil" required>
-                    <option value="">Seleccioná una opción</option>
-                    <option value="soltero">Soltero/a</option>
-                    <option value="casado">Casado/a</option>
-                    <option value="divorciado">Divorciado/a</option>
-                    <option value="viudo">Viudo/a</option>
-                    <option value="en_pareja">En pareja</option>
-                </select>
+      <label for="localidad">Localidad:</label>
+      <select id="localidad" required></select>
 
-                <label for="hijos">¿Tenés hijos?</label>
-                <select id="hijos" name="hijos" required>
-                    <option value="">Seleccioná una opción</option>
-                    <option value="si">Sí</option>
-                    <option value="no">No</option>
-                </select>
+      <label for="rubro">Rubro del Comercio:</label>
+      <select id="rubro" required>
+        <option value="">Seleccioná un rubro</option>
+      </select>
+    </fieldset>
 
-                <div id="cantidad-hijos" style="display:none;">
-                    <label for="cantidad-hijos-input">Cantidad de hijos:</label>
-                    <input type="number" id="cantidad-hijos-input" name="cantidad-hijos" min="1">
-                </div>
-            </fieldset>
+    <fieldset>
+      <legend>🌐 Presencia Online (al menos una requerida)</legend>
 
-            <!-- Datos Comerciales -->
-            <fieldset>
-                <legend>🏪 Datos del Comercio</legend>
+      <label for="web">Sitio Web del Comercio:</label>
+      <input type="url" id="web" placeholder="https://tusitio.com">
 
-                <label for="nombre-comercio">Nombre del Comercio:</label>
-                <input type="text" id="nombre-comercio" name="nombre-comercio" required>
+      <label for="instagram">Perfil de Instagram:</label>
+      <input type="url" id="instagram" placeholder="https://instagram.com/tuusuario">
 
-                <label for="direccion-comercio">Dirección:</label>
-                <input type="text" id="direccion-comercio" name="direccion-comercio" required>
+      <label for="facebook">Página de Facebook:</label>
+      <input type="url" id="facebook" placeholder="https://facebook.com/tuusuario">
+    </fieldset>
 
-                <label for="provincia">Provincia:</label>
-                <select id="provincia" name="provincia" required></select>
-
-                <label for="localidad">Localidad:</label>
-                <select id="localidad" name="localidad" required></select>
-
-                <label for="rubro">Rubro del Comercio:</label>
-                <select id="rubro" name="rubro" required>
-                    <option value="">Cargando rubros...</option>
-                </select>
-
-                <label for="redes">Redes Sociales:</label>
-                <input type="url" id="redes" name="redes" placeholder="https://instagram.com/ejemplo">
-
-                <label for="google-maps">Perfil de Google Maps:</label>
-                <input type="url" id="google-maps" name="google-maps" placeholder="URL de tu perfil en Google Maps">
-                <small>Dejá tu perfil de Google Maps para aumentar la visibilidad de tu comercio.</small>
-            </fieldset>
-
-            <button type="submit" class="btn-primary">Guardar Perfil y Comercio</button>
-        </form>
-    </main>
+    <button type="submit">Guardar Perfil</button>
+  </form>
 </body>
 </html>
-
-
-
