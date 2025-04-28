@@ -1,15 +1,18 @@
+// Verifica si el usuario está logueado y autorizado
 import { verificarSesion } from './verificar-sesion.js';
-import { auth, db } from './firebase-config.js';
+verificarSesion();
+
+import { auth, db } from "./firebase-config.js";
 import {
   signOut
-} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 import {
   collection,
   getDocs,
   doc,
   getDoc,
   updateDoc
-} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 // Elementos del DOM
 const welcomeMessage = document.getElementById("welcome-message");
@@ -17,22 +20,20 @@ const tipoTexto = document.getElementById("tipo-cuenta-texto");
 const tqcBalance = document.getElementById("tqc-balance");
 const container = document.getElementById("comercios-container");
 const avisoTiempo = document.getElementById("aviso-tiempo");
-const cerrarSesionBtn = document.getElementById("cerrar-sesion");
 
-// Variables de control
+const TIEMPO_ESPERA_MS = 5 * 60 * 60 * 1000; // 5 horas
 let usuarioActual = null;
 let tareaEnCurso = false;
-const TIEMPO_ESPERA_MS = 5 * 60 * 60 * 1000; // 5 horas
 
-// Verificar sesión y cargar datos
+// Verificación de sesión, y carga de datos
 verificarSesion().then(async ({ user, tipoCuenta, data }) => {
   usuarioActual = user;
 
   welcomeMessage.textContent = `Bienvenido, ${data.nombre || "Usuario"} ${data.apellido || ""}`;
-  tipoTexto.textContent = `Estás usando la plataforma como: ${tipoCuenta}`;
-  
+  tipoTexto.textContent = `Estás usando la plataforma como: ${tipoCuenta || "usuario"}`;
+
   const totalTqc = Object.values(data.tqcPorComercio || {}).reduce((sum, val) => sum + val, 0);
-  tqcBalance.textContent = `Tienes (${totalTqc}) TqC`;
+  tqcBalance.textContent = `🪙 Tienes (${totalTqc}) TqC`;
 
   const ultimaTarea = data.timestampUltimaTarea?.toMillis?.() || data.timestampUltimaTarea || 0;
   const tiempoTranscurrido = Date.now() - ultimaTarea;
@@ -43,22 +44,23 @@ verificarSesion().then(async ({ user, tipoCuenta, data }) => {
   if (tiempoTranscurrido >= TIEMPO_ESPERA_MS) {
     await updateDoc(doc(db, "usuarios", user.uid), { tareasCompletadas: [] });
     avisoTiempo.textContent = "✅ Podés recibir nuevas tareas ahora.";
-    cargarTareas([], localidadUsuario);
+    cargarComercios([], localidadUsuario);
   } else {
     const horas = Math.floor(tiempoRestante / (1000 * 60 * 60));
     const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
     avisoTiempo.textContent = `⏳ Volvé en ${horas}h ${minutos}m para nuevas tareas.`;
-    cargarTareas(tareasCompletadas, localidadUsuario);
+    cargarComercios(tareasCompletadas, localidadUsuario);
   }
 }).catch(() => {
-  // Si falla la verificación, la función ya redirige a inicio
+  // Redirecciona automáticamente desde verificarSesion en caso de error
 });
 
-// Función para cargar tareas disponibles
-async function cargarTareas(tareasCompletadas = [], localidadUsuario) {
+// Función que carga comercios y tareas disponibles
+async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
   try {
-    container.innerHTML = "";
     const comerciosSnap = await getDocs(collection(db, "comercios"));
+    container.innerHTML = "";
+
     const tareasDisponibles = [];
 
     comerciosSnap.forEach((docSnap) => {
@@ -66,10 +68,11 @@ async function cargarTareas(tareasCompletadas = [], localidadUsuario) {
       const comercioUid = docSnap.id;
 
       if (comercio.localidad === localidadUsuario && Array.isArray(comercio.tasks)) {
-        const nuevasTareas = comercio.tasks.filter(tarea =>
+        const tareasValidas = comercio.tasks.filter(tarea =>
           !tareasCompletadas.some(tc => tc.comercioUid === comercioUid && tc.tareaId === tarea.id)
         );
-        nuevasTareas.forEach(tarea => {
+
+        tareasValidas.forEach(tarea => {
           tareasDisponibles.push({
             ...tarea,
             comercioUid,
@@ -82,15 +85,14 @@ async function cargarTareas(tareasCompletadas = [], localidadUsuario) {
       }
     });
 
-    // Mostrar máximo 5 tareas aleatorias
-    const seleccionadas = tareasDisponibles.sort(() => 0.5 - Math.random()).slice(0, 5);
+    const aleatorias = tareasDisponibles.sort(() => 0.5 - Math.random()).slice(0, 5);
 
-    if (seleccionadas.length === 0) {
-      container.innerHTML = "<p>🚫 No hay tareas disponibles en tu localidad en este momento.</p>";
+    if (aleatorias.length === 0) {
+      container.innerHTML = "<p>🚫 No hay tareas disponibles en tu localidad por ahora.</p>";
       return;
     }
 
-    seleccionadas.forEach((tarea) => {
+    aleatorias.forEach((tarea) => {
       const card = document.createElement("div");
       card.classList.add("tarea-card");
       card.innerHTML = `
@@ -111,13 +113,14 @@ async function cargarTareas(tareasCompletadas = [], localidadUsuario) {
 
   } catch (err) {
     console.error("Error al cargar tareas:", err);
-    container.innerHTML = "<p>❌ Error al mostrar tareas. Intenta más tarde.</p>";
+    container.innerHTML = "<p>Error al mostrar tareas disponibles.</p>";
   }
 }
 
-// Manejar clicks en las tareas
+// Evento para gestionar click en botón de realizar tarea
 container.addEventListener("click", async (e) => {
   if (!e.target.classList.contains("btn-tarea") || tareaEnCurso) return;
+
   tareaEnCurso = true;
 
   const button = e.target;
@@ -126,91 +129,74 @@ container.addEventListener("click", async (e) => {
   const comercioUid = button.dataset.comercio;
   const tareaId = button.dataset.tarea;
 
-  if (!link || !comercioUid || !tareaId || isNaN(recompensa)) {
-    tareaEnCurso = false;
-    return;
-  }
+  if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
 
-  // Desactivar todos los botones temporalmente
-  document.querySelectorAll(".btn-tarea").forEach(btn => {
-    btn.disabled = true;
-    if (btn !== button) {
-      btn.textContent = "⏳ Espera para realizar otra tarea";
-    }
-  });
-
-  // Abrir nueva pestaña con el link
   window.open(link, "_blank");
 
-  let tiempoRestante = 60; // 60 segundos de espera
+  let tiempoRestante = 60;
+  const originalText = button.textContent;
+
   const intervalo = setInterval(() => {
-    button.textContent = `⏳ Espera ${tiempoRestante}s...`;
+    button.textContent = `⏳ Espera ${tiempoRestante}s antes de otra tarea`;
     tiempoRestante--;
     if (tiempoRestante < 0) clearInterval(intervalo);
   }, 1000);
 
   setTimeout(async () => {
-    try {
-      const userRef = doc(db, "usuarios", usuarioActual.uid);
-      const userSnap = await getDoc(userRef);
+    const userRef = doc(db, "usuarios", usuarioActual.uid);
+    const userSnap = await getDoc(userRef);
 
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        const tareas = data.tareasCompletadas || [];
-        const tqcPorComercio = data.tqcPorComercio || {};
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      const tareas = data.tareasCompletadas || [];
+      const tqcPorComercio = data.tqcPorComercio || {};
 
-        const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
-        if (yaHecha) {
-          tareaEnCurso = false;
-          clearInterval(intervalo);
-          button.textContent = "Realizar tarea";
-          return;
-        }
-
-        const nuevoSaldo = (tqcPorComercio[comercioUid] || 0) + recompensa;
-        tareas.push({ comercioUid, tareaId });
-
-        await updateDoc(userRef, {
-          [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
-          tareasCompletadas: tareas,
-          timestampUltimaTarea: new Date()
-        });
-
-        // Actualizar balance
-        const nuevoTotal = Object.values(tqcPorComercio).reduce((acc, val) => acc + val, 0) + recompensa;
-        tqcBalance.textContent = `Tienes (${nuevoTotal}) TqC`;
-
-        // Remover tarea visualmente
-        const card = button.closest(".tarea-card");
-        if (card) {
-          card.style.backgroundColor = "#d4edda";
-          card.innerHTML = "<p>✅ Tarea completada. ¡Buen trabajo!</p>";
-          setTimeout(() => card.remove(), 2000);
-        }
+      const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
+      if (yaHecha) {
+        clearInterval(intervalo);
+        button.textContent = originalText;
+        tareaEnCurso = false;
+        return;
       }
 
-    } catch (err) {
-      console.error("Error al procesar tarea:", err);
-      alert("Ocurrió un error al completar la tarea. Intenta nuevamente.");
-    } finally {
-      clearInterval(intervalo);
-      tareaEnCurso = false;
-      document.querySelectorAll(".btn-tarea").forEach(btn => {
-        btn.disabled = false;
-        btn.textContent = "Realizar tarea";
+      const saldoActual = tqcPorComercio[comercioUid] || 0;
+      const nuevoSaldo = saldoActual + recompensa;
+      tareas.push({ comercioUid, tareaId });
+
+      await updateDoc(userRef, {
+        [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
+        tareasCompletadas: tareas,
+        timestampUltimaTarea: new Date()
       });
+
+      clearInterval(intervalo);
+
+      const card = button.closest(".tarea-card");
+      if (card) {
+        card.style.backgroundColor = "#d4edda";
+        card.innerHTML = "<p>✅ Tarea completada. ¡Felicitaciones!</p>";
+        setTimeout(() => card.remove(), 2000);
+      }
+
+      const nuevoTotal = Object.entries(tqcPorComercio).reduce((acc, [key, val]) => {
+        return key === comercioUid ? acc + nuevoSaldo : acc + val;
+      }, 0);
+
+      tqcBalance.textContent = `🪙 Tienes (${nuevoTotal}) TqC`;
+
+      tareaEnCurso = false;
     }
-  }, 60000); // Fin de 1 minuto
+  }, 60000);
 });
 
 // Cerrar sesión
-cerrarSesionBtn.addEventListener("click", async () => {
+document.getElementById("cerrar-sesion")?.addEventListener("click", async () => {
   try {
     await signOut(auth);
     window.location.href = "registro.html";
   } catch (err) {
     console.error("Error al cerrar sesión:", err);
-    alert("No se pudo cerrar la sesión correctamente.");
   }
 });
+
 
