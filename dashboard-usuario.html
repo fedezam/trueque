@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Usuario | TruequeCoin</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TruequeCoin | Dashboard Usuario</title>
+  <link rel="stylesheet" href="styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <script type="module" src="dashboard-usuario.js" defer></script>
 </head>
-
 <body>
+
+  <!-- Barra de navegación -->
   <nav>
     <ul class="navbar">
       <li><a href="dashboard-usuario.html" class="activo">🏠 Inicio</a></li>
@@ -18,24 +19,20 @@
     </ul>
   </nav>
 
-  <main>
-    <section class="bienvenida">
-      <h1 id="welcome-message">Bienvenido</h1>
-      <p id="tipo-cuenta-texto"></p>
-      <p id="tqc-balance"></p>
-    </section>
-
-    <section class="aviso-tiempo">
-      <p id="aviso-tiempo"></p>
-    </section>
-
-    <section class="tareas-disponibles">
-      <h2>📋 Tareas Disponibles</h2>
-      <div id="comercios-container">
-        <!-- Aquí se cargarán las tareas dinámicamente -->
-      </div>
-    </section>
+  <!-- Bienvenida -->
+  <main class="bienvenida">
+    <h1 id="welcome-message">Bienvenido</h1>
+    <p id="tipo-cuenta-texto"></p>
   </main>
+
+  <!-- Información de tareas -->
+  <section class="tareas">
+    <h2>📋 Tareas Disponibles</h2>
+    <p id="aviso-tiempo"></p>
+    <div id="comercios-container" class="tareas-grid"></div>
+    <h3 id="tqc-balance">🪙 Tienes (0) TqC</h3>
+  </section>
+
 </body>
 </html>
 
