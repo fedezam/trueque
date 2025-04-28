@@ -1,17 +1,20 @@
+// dashboard-usuario.js
+// Dashboard para usuarios normales (NO comercios)
+
 import { verificarSesion } from './verificar-sesion.js';
-verificarSesion();
-import { auth, db } from "./firebase-config.js";
+import { auth, db } from './firebase-config.js';
 import {
   signOut
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 import {
   collection,
   getDocs,
   doc,
   getDoc,
   updateDoc
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 
+// Elementos del DOM
 const welcomeMessage = document.getElementById("welcome-message");
 const tipoTexto = document.getElementById("tipo-cuenta-texto");
 const tqcBalance = document.getElementById("tqc-balance");
@@ -22,18 +25,24 @@ const TIEMPO_ESPERA_MS = 5 * 60 * 60 * 1000; // 5 horas
 let usuarioActual = null;
 let tareaEnCurso = false;
 
+// Verificar sesión antes de cargar la página
 verificarSesion().then(async ({ user, tipoCuenta, data }) => {
+  if (tipoCuenta !== "usuario") {
+    console.warn("Tipo de cuenta incorrecto, redirigiendo...");
+    window.location.href = "dashboard-comercio.html";
+    return;
+  }
+
   usuarioActual = user;
 
   welcomeMessage.textContent = `Bienvenido, ${data.nombre || "Usuario"} ${data.apellido || ""}`;
-  tipoTexto.textContent = `Estás usando la plataforma como: ${tipoCuenta || "usuario"}`;
+  tipoTexto.textContent = `Estás usando la plataforma como: ${tipoCuenta}`;
 
   const totalTqc = Object.values(data.tqcPorComercio || {}).reduce((sum, val) => sum + val, 0);
   tqcBalance.textContent = `Tienes (${totalTqc}) TqC`;
 
   const ultimaTarea = data.timestampUltimaTarea?.toMillis?.() || data.timestampUltimaTarea || 0;
   const tiempoTranscurrido = Date.now() - ultimaTarea;
-  const tiempoRestante = TIEMPO_ESPERA_MS - tiempoTranscurrido;
   const tareasCompletadas = data.tareasCompletadas || [];
   const localidadUsuario = data.localidad || null;
 
@@ -42,15 +51,17 @@ verificarSesion().then(async ({ user, tipoCuenta, data }) => {
     avisoTiempo.textContent = "✅ Podés recibir nuevas tareas ahora.";
     cargarComercios([], localidadUsuario);
   } else {
-    const horas = Math.floor(tiempoRestante / (1000 * 60 * 60));
-    const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
+    const horas = Math.floor(tiempoTranscurrido / (1000 * 60 * 60));
+    const minutos = Math.floor((tiempoTranscurrido % (1000 * 60 * 60)) / (1000 * 60));
     avisoTiempo.textContent = `⏳ Volvé en ${horas}h ${minutos}m para nuevas tareas.`;
     cargarComercios(tareasCompletadas, localidadUsuario);
   }
+
 }).catch(() => {
-  // No hace falta hacer nada. Si hay error, la función de verificación ya redirige.
+  // Ya redirige adentro de verificarSesion, no hacemos nada extra aquí
 });
 
+// Función para cargar las tareas disponibles
 async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
   try {
     const comerciosSnap = await getDocs(collection(db, "comercios"));
@@ -71,7 +82,7 @@ async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
           tareasDisponibles.push({
             ...tarea,
             comercioUid,
-            comercioNombre: comercio.nombre,
+            comercioNombre: comercio.nombreComercio,
             localidad: comercio.localidad,
             provincia: comercio.provincia,
             rubro: comercio.rubro || "No especificado"
@@ -112,6 +123,7 @@ async function cargarComercios(tareasCompletadas = [], localidadUsuario) {
   }
 }
 
+// Manejo de click en botones de tareas
 container.addEventListener("click", async (e) => {
   if (!e.target.classList.contains("btn-tarea") || tareaEnCurso) return;
 
@@ -123,7 +135,12 @@ container.addEventListener("click", async (e) => {
   const comercioUid = button.dataset.comercio;
   const tareaId = button.dataset.tarea;
 
-  if (!link || !comercioUid || !tareaId || isNaN(recompensa)) return;
+  if (!link || !comercioUid || !tareaId || isNaN(recompensa)) {
+    tareaEnCurso = false;
+    return;
+  }
+
+  window.open(link, "_blank");
 
   const botones = document.querySelectorAll(".btn-tarea");
   botones.forEach(btn => {
@@ -133,13 +150,10 @@ container.addEventListener("click", async (e) => {
     }
   });
 
-  window.open(link, "_blank");
-
   let tiempoRestante = 60;
   const originalText = button.textContent;
-
   const intervalo = setInterval(() => {
-    button.textContent = `⏳ Espera ${tiempoRestante}s antes de otra tarea`;
+    button.textContent = `⏳ Espera ${tiempoRestante}s`;
     tiempoRestante--;
     if (tiempoRestante < 0) clearInterval(intervalo);
   }, 1000);
@@ -153,46 +167,35 @@ container.addEventListener("click", async (e) => {
       const tareas = data.tareasCompletadas || [];
       const tqcPorComercio = data.tqcPorComercio || {};
 
-      const yaHecha = tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId);
-      if (yaHecha) {
-        clearInterval(intervalo);
-        button.textContent = originalText;
-        tareaEnCurso = false;
-        return;
+      if (!tareas.some(t => t.comercioUid === comercioUid && t.tareaId === tareaId)) {
+        const nuevoSaldo = (tqcPorComercio[comercioUid] || 0) + recompensa;
+        tareas.push({ comercioUid, tareaId });
+
+        await updateDoc(userRef, {
+          [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
+          tareasCompletadas: tareas,
+          timestampUltimaTarea: new Date()
+        });
+
+        tqcBalance.textContent = `Tienes (${Object.values(tqcPorComercio).reduce((sum, val) => sum + val, recompensa)}) TqC`;
+
+        const card = button.closest(".tarea-card");
+        if (card) {
+          card.style.backgroundColor = "#d4edda";
+          card.innerHTML = "<p>✅ Tarea completada. ¡Felicitaciones!</p>";
+          setTimeout(() => card.remove(), 2000);
+        }
       }
-
-      const saldoActual = tqcPorComercio[comercioUid] || 0;
-      const nuevoSaldo = saldoActual + recompensa;
-      tareas.push({ comercioUid, tareaId });
-
-      await updateDoc(userRef, {
-        [`tqcPorComercio.${comercioUid}`]: nuevoSaldo,
-        tareasCompletadas: tareas,
-        timestampUltimaTarea: new Date()
-      });
-
-      clearInterval(intervalo);
-
-      const card = button.closest(".tarea-card");
-      if (card) {
-        card.style.backgroundColor = "#d4edda";
-        card.innerHTML = "<p>✅ Tarea completada. ¡Felicitaciones!</p>";
-        setTimeout(() => card.remove(), 2000);
-      }
-
-      document.querySelectorAll(".btn-tarea").forEach(btn => {
-        btn.disabled = false;
-        btn.textContent = "Realizar tarea";
-      });
-
-      const nuevoTotal = Object.entries(tqcPorComercio).reduce((acc, [key, val]) => {
-        return key === comercioUid ? acc + nuevoSaldo : acc + val;
-      }, 0);
-
-      tqcBalance.textContent = `Tienes (${nuevoTotal}) TqC`;
-
-      tareaEnCurso = false;
     }
+
+    document.querySelectorAll(".btn-tarea").forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = "Realizar tarea";
+    });
+
+    clearInterval(intervalo);
+    tareaEnCurso = false;
+
   }, 60000);
 });
 
