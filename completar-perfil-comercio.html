@@ -11,8 +11,8 @@
   <h1>Completar Perfil - Comercio</h1>
 
   <form id="completar-perfil-form">
-    
-    <!-- DATOS PERSONALES DEL COMERCIANTE -->
+
+    <!-- Datos personales -->
     <fieldset>
       <legend>👤 Datos personales del comerciante</legend>
 
@@ -37,7 +37,7 @@
       </select>
     </fieldset>
 
-    <!-- DATOS DEL COMERCIO -->
+    <!-- Datos del comercio -->
     <fieldset>
       <legend>🏪 Datos del comercio</legend>
 
@@ -56,14 +56,17 @@
       <label for="rubro">Rubro del comercio:</label>
       <select id="rubro" required>
         <option value="">Seleccioná un rubro</option>
+        <!-- Se cargan dinámicamente desde rubros.json -->
       </select>
 
-      <label for="redes">Redes sociales:</label>
-      <input type="url" id="redes" placeholder="https://instagram.com/ejemplo" />
+      <label for="redes">Perfil en redes sociales (opcional):</label>
+      <input type="url" id="redes" placeholder="https://instagram.com/mi_comercio" />
     </fieldset>
 
     <button type="submit">Guardar perfil y comercio</button>
   </form>
+
 </body>
 </html>
+
 
