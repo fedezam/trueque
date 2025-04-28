@@ -2,86 +2,90 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Completar Perfil</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completar Perfil Usuario</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <script type="module" src="completar-perfil-usuario.js" defer></script>
 </head>
 <body>
-  <h1>Completar Perfil</h1>
+  <div class="container">
+    <h2>Completar Perfil</h2>
 
-  <form id="completar-perfil-form">
-    <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" required />
+    <form id="completar-perfil-form">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" required class="input-form">
 
-    <label for="apellido">Apellido:</label>
-    <input type="text" id="apellido" required />
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" required class="input-form">
 
-    <label for="telefono">Teléfono:</label>
-    <input type="tel" id="telefono" required />
+      <label for="telefono">Teléfono:</label>
+      <input type="tel" id="telefono" required class="input-form">
 
-    <label for="edad">Edad:</label>
-    <select id="edad" required>
-      <option value="">Seleccioná tu edad</option>
-      <option value="-18">Menos de 18</option>
-      <option value="18-25">18 a 25</option>
-      <option value="26-35">26 a 35</option>
-      <option value="36-45">36 a 45</option>
-      <option value="46-60">46 a 60</option>
-      <option value="60+">Más de 60</option>
-    </select>
+      <label for="edad">Edad:</label>
+      <select id="edad" required class="input-form">
+        <option value="">Seleccioná tu edad</option>
+        <option value="-18">Menos de 18</option>
+        <option value="18-25">18 a 25</option>
+        <option value="26-35">26 a 35</option>
+        <option value="36-45">36 a 45</option>
+        <option value="46-60">46 a 60</option>
+        <option value="60+">Más de 60</option>
+      </select>
 
-    <label for="provincia">Provincia:</label>
-    <select id="provincia" required></select>
+      <label for="provincia">Provincia:</label>
+      <select id="provincia" required class="input-form"></select>
 
-    <label for="localidad">Localidad:</label>
-    <select id="localidad" required></select>
+      <label for="localidad">Localidad:</label>
+      <select id="localidad" required class="input-form"></select>
 
-    <label for="formacion-academica">Formación Académica:</label>
-    <select id="formacion-academica">
-      <option value="">Seleccioná una opción</option>
-      <option value="no tiene estudios">No tiene estudios</option>
-      <option value="primaria">Primaria</option>
-      <option value="secundaria">Secundaria</option>
-      <option value="terciaria">Terciaria</option>
-      <option value="universitaria">Universitaria</option>
-    </select>
+      <label for="formacion-academica">Formación Académica:</label>
+      <select id="formacion-academica" class="input-form">
+        <option value="">Seleccioná una opción</option>
+        <option value="no tiene estudios">No tiene estudios</option>
+        <option value="primaria">Primaria</option>
+        <option value="secundaria">Secundaria</option>
+        <option value="terciaria">Terciaria</option>
+        <option value="universitaria">Universitaria</option>
+      </select>
 
-    <label for="trabajo">Situación Laboral:</label>
-    <select id="trabajo">
-      <option value="">Seleccioná una opción</option>
-      <option value="desempleado">Desempleado</option>
-      <option value="empleado">Empleado</option>
-      <option value="independiente">Trabajador independiente</option>
-      <option value="comerciante">Comerciante</option>
-      <option value="jubilado">Jubilado</option>
-      <option value="estudiante">Estudiante</option>
-    </select>
+      <label for="trabajo">Situación Laboral:</label>
+      <select id="trabajo" class="input-form">
+        <option value="">Seleccioná una opción</option>
+        <option value="desempleado">Desempleado</option>
+        <option value="empleado">Empleado</option>
+        <option value="independiente">Trabajador independiente</option>
+        <option value="comerciante">Comerciante</option>
+        <option value="jubilado">Jubilado</option>
+        <option value="estudiante">Estudiante</option>
+      </select>
 
-    <label for="ecivil">Estado Civil:</label>
-    <select id="ecivil" required>
-      <option value="">Seleccioná una opción</option>
-      <option value="soltero">Soltero/a</option>
-      <option value="casado">Casado/a</option>
-      <option value="divorciado">Divorciado/a</option>
-      <option value="viudo">Viudo/a</option>
-      <option value="en_pareja">En pareja</option>
-    </select>
+      <label for="ecivil">Estado Civil:</label>
+      <select id="ecivil" required class="input-form">
+        <option value="">Seleccioná una opción</option>
+        <option value="soltero">Soltero/a</option>
+        <option value="casado">Casado/a</option>
+        <option value="divorciado">Divorciado/a</option>
+        <option value="viudo">Viudo/a</option>
+        <option value="en_pareja">En pareja</option>
+      </select>
 
-    <label for="hijos">¿Tenés hijos?</label>
-    <select id="hijos" required>
-      <option value="">Seleccioná una opción</option>
-      <option value="si">Sí</option>
-      <option value="no">No</option>
-    </select>
+      <label for="hijos">¿Tenés hijos?</label>
+      <select id="hijos" required class="input-form">
+        <option value="">Seleccioná una opción</option>
+        <option value="si">Sí</option>
+        <option value="no">No</option>
+      </select>
 
-    <div id="cantidad-hijos" style="display: none;">
-      <label for="cantidad-hijos-input">Cantidad de hijos:</label>
-      <input type="number" id="cantidad-hijos-input" min="1" />
-    </div>
+      <div id="cantidad-hijos" style="display: none;">
+        <label for="cantidad-hijos-input">Cantidad de hijos:</label>
+        <input type="number" id="cantidad-hijos-input" min="1" class="input-form">
+      </div>
 
-    <button type="submit">Guardar perfil</button>
-  </form>
+      <button type="submit" class="btn-primary">Guardar Perfil</button>
+    </form>
+  </div>
 </body>
 </html>
 
