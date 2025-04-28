@@ -5,12 +5,7 @@ import { auth, db } from './firebase-config.js';
 import {
   doc,
   setDoc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc
+  getDoc
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 
@@ -20,7 +15,21 @@ const localidadesSelect = document.getElementById('localidad');
 const rubroSelect = document.getElementById('rubro');
 
 let localidadesGlobal = [];
-let comercioExistenteId = null; // Guardar ID del comercio si existe
+
+const mostrarErrorCampo = (inputId, mensaje) => {
+  let errorSpan = document.querySelector(`#${inputId}-error`);
+  if (!errorSpan) {
+    errorSpan = document.createElement('span');
+    errorSpan.id = `${inputId}-error`;
+    errorSpan.className = 'error-msg';
+    document.getElementById(inputId).after(errorSpan);
+  }
+  errorSpan.textContent = mensaje;
+};
+
+const limpiarErrores = () => {
+  document.querySelectorAll('.error-msg').forEach(el => el.remove());
+};
 
 // Cargar provincias y localidades
 fetch('localidades.json')
@@ -48,9 +57,13 @@ fetch('localidades.json')
           localidadesSelect.appendChild(option);
         });
     });
+  })
+  .catch(err => {
+    console.error('Error cargando localidades:', err);
+    alert('Error cargando provincias y localidades.');
   });
 
-// Cargar rubros
+// Cargar rubros comerciales
 fetch('rubros.json')
   .then(res => res.json())
   .then(data => {
@@ -60,99 +73,99 @@ fetch('rubros.json')
       option.textContent = rubro.rubro;
       rubroSelect.appendChild(option);
     });
+  })
+  .catch(err => {
+    console.error('Error cargando rubros:', err);
+    alert('Error cargando rubros.');
   });
 
+// Lógica de sesión
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert('Debés iniciar sesión primero.');
-    return window.location.href = 'login.html';
+    window.location.href = 'login.html';
+    return;
   }
 
   const tipoCuenta = localStorage.getItem('tipoCuenta');
   if (tipoCuenta !== 'comercio') {
-    alert('Esta página es solo para cuentas de comercio.');
-    return window.location.href = 'dashboard-usuario.html';
+    alert('Esta página es solo para comercios.');
+    window.location.href = 'dashboard-usuario.html';
+    return;
   }
 
-  const usuarioDocRef = doc(db, 'usuariosComercio', user.uid);
+  const docRef = doc(db, 'usuariosComercio', user.uid);
 
   try {
-    // Cargar datos del usuarioComercio
-    const usuarioSnap = await getDoc(usuarioDocRef);
-    if (usuarioSnap.exists()) {
-      const data = usuarioSnap.data();
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
       document.getElementById('nombre').value = data.nombre || '';
       document.getElementById('apellido').value = data.apellido || '';
       document.getElementById('telefono').value = data.telefono || '';
       document.getElementById('edad').value = data.edad || '';
     }
-
-    // Cargar el primer comercio asociado
-    const q = query(collection(db, 'comercios'), where('uidDueno', '==', user.uid));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const comercio = querySnapshot.docs[0].data();
-      comercioExistenteId = querySnapshot.docs[0].id;
-      document.getElementById('nombre-comercio').value = comercio.nombreComercio || '';
-      document.getElementById('direccion-comercio').value = comercio.direccion || '';
-      document.getElementById('redes').value = comercio.redes || '';
-      rubroSelect.value = comercio.rubro || '';
-
-      if (comercio.provincia) {
-        provinciasSelect.value = comercio.provincia;
-        provinciasSelect.dispatchEvent(new Event('change'));
-        setTimeout(() => {
-          localidadesSelect.value = comercio.localidad || '';
-        }, 500);
-      }
-    }
-
   } catch (err) {
-    console.error('Error al obtener datos del perfil:', err);
-    alert('Error al cargar el perfil.');
+    console.error('Error obteniendo datos del usuario comercio:', err);
+    alert('Error cargando tus datos. Intentalo más tarde.');
   }
+});
 
-  // Guardar
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Guardar perfil
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  limpiarErrores();
 
-    const datosUsuario = {
-      nombre: document.getElementById('nombre').value.trim(),
-      apellido: document.getElementById('apellido').value.trim(),
-      telefono: document.getElementById('telefono').value.trim(),
-      edad: document.getElementById('edad').value,
-      completadoPerfil: true,
-    };
+  const campos = [
+    { id: 'nombre', obligatorio: true },
+    { id: 'apellido', obligatorio: true },
+    { id: 'telefono', obligatorio: true },
+    { id: 'edad', obligatorio: true },
+    { id: 'nombre-comercio', obligatorio: true },
+    { id: 'direccion-comercio', obligatorio: true },
+    { id: 'provincia', obligatorio: true },
+    { id: 'localidad', obligatorio: true },
+    { id: 'rubro', obligatorio: true }
+  ];
 
-    const datosComercio = {
-      uidDueno: user.uid,
-      nombreComercio: document.getElementById('nombre-comercio').value.trim(),
-      direccion: document.getElementById('direccion-comercio').value.trim(),
-      provincia: provinciasSelect.value,
-      localidad: localidadesSelect.value,
-      rubro: rubroSelect.value,
-      redes: document.getElementById('redes').value.trim(),
-      creadoEn: new Date().toISOString()
-    };
+  let hayErrores = false;
 
-    try {
-      // Guardar datos personales
-      await setDoc(usuarioDocRef, datosUsuario, { merge: true });
-
-      if (comercioExistenteId) {
-        // Actualizar comercio existente
-        await setDoc(doc(db, 'comercios', comercioExistenteId), datosComercio, { merge: true });
-      } else {
-        // Crear nuevo comercio
-        await addDoc(collection(db, 'comercios'), datosComercio);
-      }
-
-      alert('Perfil y comercio guardados correctamente.');
-      window.location.href = 'dashboard-comercio.html';
-    } catch (err) {
-      console.error('Error al guardar perfil o comercio:', err);
-      alert('Error al guardar. Intentá de nuevo.');
+  campos.forEach(({ id, obligatorio }) => {
+    const valor = document.getElementById(id)?.value.trim();
+    if (obligatorio && (!valor || valor === '')) {
+      mostrarErrorCampo(id, 'Este campo es obligatorio.');
+      hayErrores = true;
     }
   });
+
+  if (hayErrores) {
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  const perfilActualizado = {
+    ownerUid: auth.currentUser.uid,
+    nombre: document.getElementById('nombre').value.trim(),
+    apellido: document.getElementById('apellido').value.trim(),
+    telefono: document.getElementById('telefono').value.trim(),
+    edad: document.getElementById('edad').value,
+    nombreComercio: document.getElementById('nombre-comercio').value.trim(),
+    direccion: document.getElementById('direccion-comercio').value.trim(),
+    provincia: provinciasSelect.value,
+    localidad: localidadesSelect.value,
+    rubro: rubroSelect.value,
+    redes: document.getElementById('redes')?.value.trim() || '',
+    completadoPerfil: true
+  };
+
+  try {
+    const docRef = doc(db, 'usuariosComercio', auth.currentUser.uid);
+    await setDoc(docRef, perfilActualizado, { merge: true });
+    alert('✅ Perfil del comercio guardado correctamente.');
+    window.location.href = 'dashboard-comercio.html';
+  } catch (err) {
+    console.error('Error al guardar perfil comercio:', err);
+    alert('❌ Error al guardar. Verificá tu conexión.');
+  }
 });
+
