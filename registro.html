@@ -4,82 +4,55 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro | TruequeCoin</title>
-
-  <!-- Estilos -->
-  <link rel="stylesheet" href="style.css">
+  <title>Registro - TruequeCoin</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
-
-  <!-- Script principal -->
   <script type="module" src="registro.js" defer></script>
 </head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
 
-<body>
-  <main class="container">
+  <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-blue-600 mb-6">Crear cuenta</h1>
 
-    <h1>Crear Cuenta</h1>
+    <form id="registro-form" class="flex flex-col gap-4">
+      <input type="text" id="nombre" placeholder="Nombre" required class="input-form">
+      <input type="text" id="apellido" placeholder="Apellido" required class="input-form">
+      <input type="email" id="email" placeholder="Email" required class="input-form">
+      <input type="tel" id="telefono" placeholder="Teléfono" required class="input-form">
 
-    <form id="registro-form" class="formulario">
-
-      <!-- Datos básicos -->
-      <label for="nombre">Nombre:</label>
-      <input type="text" id="nombre" placeholder="Tu nombre" required>
-
-      <label for="apellido">Apellido:</label>
-      <input type="text" id="apellido" placeholder="Tu apellido" required>
-
-      <label for="telefono">Teléfono:</label>
-      <input type="tel" id="telefono" placeholder="Tu número de contacto" required>
-
-      <label for="email">Correo electrónico:</label>
-      <input type="email" id="email" placeholder="correo@ejemplo.com" required>
-
-      <label for="password">Contraseña:</label>
-      <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
-
-      <label for="confirm-password">Confirmar contraseña:</label>
-      <input type="password" id="confirm-password" placeholder="Repetí tu contraseña" required>
-
-      <!-- Mostrar contraseña -->
-      <div class="checkbox-group">
-        <input type="checkbox" id="mostrar-contrasena">
-        <label for="mostrar-contrasena">Mostrar contraseña</label>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2">
+          <input type="radio" name="tipo-cuenta" value="usuario" required>
+          Usuario
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="radio" name="tipo-cuenta" value="comercio" required>
+          Comercio
+        </label>
       </div>
 
-      <!-- Selección de tipo de cuenta -->
-      <fieldset class="fieldset">
-        <legend>¿Cómo querés registrarte?</legend>
+      <input type="password" id="password" placeholder="Contraseña" required class="input-form">
+      <input type="password" id="confirm-password" placeholder="Confirmar contraseña" required class="input-form">
 
-        <label>
-          <input type="radio" name="tipo-cuenta" value="usuario" required>
-          Soy usuario (quiero realizar tareas y ganar TqC)
-        </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="mostrar-contrasena">
+        Mostrar contraseña
+      </label>
 
-        <label>
-          <input type="radio" name="tipo-cuenta" value="comercio" required>
-          Soy comercio/emprendedor (quiero publicar tareas)
-        </label>
-      </fieldset>
-
-      <button type="submit" class="btn">Crear Cuenta</button>
+      <button type="submit" class="btn-primary">Registrarme</button>
     </form>
 
-    <hr>
+    <div class="mt-6">
+      <button id="google-login" class="w-full btn-google">Registrarse con Google</button>
+    </div>
 
-    <!-- Opción de Google -->
-    <button id="google-login" class="btn-google">
-      Registrarme con Google
-    </button>
-
-    <!-- Links secundarios -->
-    <p class="texto-secundario">
-      ¿Ya tenés cuenta? <a href="login.html">Iniciar sesión</a>
+    <p class="text-center text-sm text-gray-500 mt-4">
+      ¿Ya tenés cuenta? 
+      <a href="login.html" class="text-blue-500 hover:underline">Iniciar sesión</a>
     </p>
-    <p class="texto-secundario">
-      ¿Olvidaste tu contraseña? <a href="recuperar.html">Recuperarla</a>
-    </p>
+  </div>
 
-  </main>
 </body>
 </html>
 
