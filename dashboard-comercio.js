@@ -1,56 +1,56 @@
-import { verificarSesion } from './verificar-sesion.js';
-verificarSesion();
+// dashboard-comercio.js
+// Dashboard para comercios (usuarios que gestionan tareas de marketing)
 
-import { auth, db } from "./firebase-config.js";
+import { verificarSesion } from './verificar-sesion.js';
+import { auth, db } from './firebase-config.js';
 import {
-  onAuthStateChanged,
   signOut
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 import {
   doc,
   getDoc,
   updateDoc
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 
+// Elementos del DOM
 const welcomeMessage = document.getElementById("welcome-message");
 const comercioInfo = document.getElementById("comercio-info");
 const form = document.getElementById("tareas-form");
 const camposContainer = document.getElementById("campos-tareas");
 const estadoGuardado = document.getElementById("estado-guardado");
 
-let comercioDocRef = null;
-let tareasExistentes = [];
 const MAX_TAREAS = 10;
-const TIEMPO_VIDA_MS = 5 * 24 * 60 * 60 * 1000;
+const TIEMPO_VIDA_MS = 5 * 24 * 60 * 60 * 1000; // 5 días
 const RECOMPENSA_PREDETERMINADA = 1;
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("No has iniciado sesión.");
-    window.location.href = "login.html";
+let comercioDocRef = null;
+let tareasExistentes = [];
+
+// Verificar sesión antes de cargar la página
+verificarSesion().then(async ({ user, tipoCuenta, data }) => {
+  if (tipoCuenta !== "comercio") {
+    console.warn("Tipo de cuenta incorrecto, redirigiendo...");
+    window.location.href = "dashboard-usuario.html";
     return;
   }
 
   comercioDocRef = doc(db, "comercios", user.uid);
-  const snap = await getDoc(comercioDocRef);
 
-  if (!snap.exists()) {
-    alert("Comercio no registrado.");
-    return;
-  }
-
-  const data = snap.data();
   welcomeMessage.textContent = `Bienvenido, ${data.nombre || "Comercio"}`;
   comercioInfo.textContent = `📍 ${data.localidad}, ${data.provincia}`;
 
-  tareasExistentes = (data.tasks || []).filter((t) => {
-    const ts = t.timestamp?.toMillis ? t.timestamp.toMillis() : t.timestamp;
+  tareasExistentes = (data.tasks || []).filter((tarea) => {
+    const ts = tarea.timestamp?.toMillis ? tarea.timestamp.toMillis() : tarea.timestamp;
     return Date.now() - ts < TIEMPO_VIDA_MS;
   });
 
   mostrarCamposTareas(tareasExistentes);
+
+}).catch(() => {
+  // No hacemos nada, ya redirige internamente si no hay sesión
 });
 
+// Función para mostrar los campos de tareas
 function mostrarCamposTareas(tareasActivas) {
   camposContainer.innerHTML = "";
 
@@ -61,30 +61,20 @@ function mostrarCamposTareas(tareasActivas) {
   });
 
   const espaciosLibres = MAX_TAREAS - tareasActivas.length;
-
   for (let i = 0; i < espaciosLibres; i++) {
     const input = document.createElement("input");
     input.type = "url";
+    input.placeholder = `Nuevo link (${i + 1})`;
     input.classList.add("link-input");
-
-    if (i === 0) {
-      input.placeholder = "🔗 Ingresá el perfil de tu comercio en Google Maps";
-      const desc = document.createElement("p");
-      desc.textContent = "💡 Consejo: Añadí aquí tu link de Google Maps para que tus clientes te encuentren más fácilmente y mejorar tu visibilidad local.";
-      desc.style.fontStyle = "italic";
-      desc.style.fontSize = "0.9em";
-      camposContainer.appendChild(desc);
-    } else {
-      input.placeholder = `Nuevo link (${i + 1})`;
-    }
-
     camposContainer.appendChild(input);
   }
 }
 
+// Guardar nuevas tareas
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const inputs = document.querySelectorAll(".link-input");
+
   const nuevasTareas = [];
 
   for (const input of inputs) {
@@ -112,14 +102,21 @@ form.addEventListener("submit", async (e) => {
     const nuevas = [...tareasExistentes, ...nuevasTareas].slice(0, MAX_TAREAS);
     await updateDoc(comercioDocRef, { tasks: nuevas });
     estadoGuardado.textContent = "✅ Tareas guardadas correctamente.";
-    location.reload();
+    setTimeout(() => window.location.reload(), 1000);
   } catch (err) {
     console.error("Error al guardar tareas:", err);
     estadoGuardado.textContent = "❌ Error al guardar tareas.";
   }
 });
 
-document.getElementById("cerrar-sesion").addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "registro.html";
+// Cerrar sesión
+document.getElementById("cerrar-sesion")?.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    window.location.href = "registro.html";
+  } catch (err) {
+    console.error("Error al cerrar sesión:", err);
+  }
 });
+
+
