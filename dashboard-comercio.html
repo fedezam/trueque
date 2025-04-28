@@ -1,34 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Comercio</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Comercio - TruequeCoin</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <script type="module" src="dashboard-comercio.js" defer></script>
 </head>
+
 <body>
+  <!-- Navegación principal -->
   <nav>
     <ul class="navbar">
       <li><a href="dashboard-comercio.html" class="activo">🏪 Mi Comercio</a></li>
-      <li><button id="cerrar-sesion">🔒 Cerrar sesión</button></li>
+      <li><a href="#" id="link-estadisticas">📈 Estadísticas</a></li>
+      <li><a href="#" id="link-campañas">🎯 Campañas</a></li>
+      <li><button id="cerrar-sesion">🔒 Cerrar Sesión</button></li>
     </ul>
   </nav>
 
   <main>
-    <section class="bienvenida">
+    <!-- Resumen del comercio -->
+    <section class="info-comercio">
       <h1 id="welcome-message">Bienvenido</h1>
-      <p id="comercio-info"></p>
+      <div id="datos-comercio">
+        <!-- Aquí se llenarán dinámicamente los datos del comercio -->
+      </div>
     </section>
 
+    <!-- Gestión de Tareas -->
     <section class="formulario-tareas">
       <h2>📤 Gestionar Tareas (máx. 10)</h2>
       <form id="tareas-form">
         <div id="campos-tareas"></div>
         <button type="submit">Guardar nuevas tareas</button>
+        <p id="estado-guardado-tareas"></p>
       </form>
-      <p id="estado-guardado"></p>
     </section>
   </main>
 </body>
 </html>
+
