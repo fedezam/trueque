@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Completar Perfil - Usuario</title>
-<link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <script type="module" src="completar-perfil-usuario.js" defer></script>
 </head>
 <body>
@@ -18,13 +18,13 @@
         <legend>Datos personales</legend>
 
         <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" name="nombre" required />
+        <input type="text" id="nombre" name="nombre" required autocomplete="given-name" />
 
         <label for="apellido">Apellido</label>
-        <input type="text" id="apellido" name="apellido" required />
+        <input type="text" id="apellido" name="apellido" required autocomplete="family-name" />
 
         <label for="telefono">Teléfono</label>
-        <input type="tel" id="telefono" name="telefono" required />
+        <input type="tel" id="telefono" name="telefono" required autocomplete="tel" />
 
         <label for="edad">Edad</label>
         <input type="number" id="edad" name="edad" min="0" required />
@@ -41,9 +41,6 @@
 
         <label for="direccion">Dirección</label>
         <input type="text" id="direccion" name="direccion" required />
-
-        <label for="numero">Número</label>
-        <input type="text" id="numero" name="numero" />
 
         <label for="departamento">Departamento / Piso (opcional)</label>
         <input type="text" id="departamento" name="departamento" />
@@ -83,8 +80,6 @@
       <button type="submit">Guardar perfil</button>
     </form>
   </div>
-
-  <script type="module" src="completar-perfil-usuario.js"></script>
 </body>
 </html>
 
