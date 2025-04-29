@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Completar Perfil Usuario</title>
+  <title>Completar Perfil - Usuario</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <script type="module" src="completar-perfil-usuario.js" defer></script>
@@ -12,7 +12,6 @@
 <body>
   <div class="container">
     <h2>Completar Perfil</h2>
-
     <form id="completar-perfil-form">
       <label for="nombre">Nombre:</label>
       <input type="text" id="nombre" required class="input-form">
@@ -34,14 +33,8 @@
         <option value="60+">Más de 60</option>
       </select>
 
-      <label for="provincia">Provincia:</label>
-      <select id="provincia" required class="input-form"></select>
-
-      <label for="localidad">Localidad:</label>
-      <select id="localidad" required class="input-form"></select>
-
       <label for="formacion-academica">Formación Académica:</label>
-      <select id="formacion-academica" class="input-form">
+      <select id="formacion-academica" required class="input-form">
         <option value="">Seleccioná una opción</option>
         <option value="no tiene estudios">No tiene estudios</option>
         <option value="primaria">Primaria</option>
@@ -51,7 +44,7 @@
       </select>
 
       <label for="trabajo">Situación Laboral:</label>
-      <select id="trabajo" class="input-form">
+      <select id="trabajo" required class="input-form">
         <option value="">Seleccioná una opción</option>
         <option value="desempleado">Desempleado</option>
         <option value="empleado">Empleado</option>
@@ -83,9 +76,22 @@
         <input type="number" id="cantidad-hijos-input" min="1" class="input-form">
       </div>
 
-      <button type="submit" class="btn-primary">Guardar Perfil</button>
+      <label for="direccion">Calle y número:</label>
+      <input type="text" id="direccion" required class="input-form">
+
+      <label for="departamento">Departamento (opcional):</label>
+      <input type="text" id="departamento" class="input-form">
+
+      <label for="provincia">Provincia:</label>
+      <select id="provincia" required class="input-form"></select>
+
+      <label for="localidad">Localidad:</label>
+      <select id="localidad" required class="input-form"></select>
+
+      <button type="submit" class="btn-primary">Guardar perfil</button>
     </form>
   </div>
 </body>
 </html>
+
 
