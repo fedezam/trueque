@@ -81,6 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (docSnap.exists()) {
         const d = docSnap.data();
+        if (!form.nombre) {
+  console.error('❌ Campo "nombre" no existe en el formulario');
+  return alert('El formulario está mal cargado. Revisá el HTML.');
+}
+
         console.log('✅ Datos cargados:', d);
 
         form.nombre.value = d.nombre || '';
