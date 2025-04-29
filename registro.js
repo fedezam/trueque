@@ -9,52 +9,75 @@ import {
   getDoc
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 
-// Elementos HTML
+// Elementos del DOM
 const form = document.getElementById('registro-form');
 const googleLoginBtn = document.getElementById('google-login');
 
-// Mostrar / ocultar contraseña
+// Mostrar contraseña
 document.getElementById('mostrar-contrasena')?.addEventListener('change', (e) => {
   const tipo = e.target.checked ? 'text' : 'password';
   document.getElementById('password').type = tipo;
   document.getElementById('confirm-password').type = tipo;
 });
 
-// Validación básica de contraseña segura
+// Validación de contraseña
 const validarPassword = (password) => {
   const tieneMayuscula = /[A-Z]/.test(password);
   const tieneEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
   return password.length >= 6 && tieneMayuscula && tieneEspecial;
 };
 
-// Leer parámetros de la URL (código de referido)
+// Código de referido desde la URL
 const params = new URLSearchParams(window.location.search);
 const referidoPor = params.get('ref') || null;
 
-// Variable para almacenar el tipo de cuenta seleccionado
+// Tipo de cuenta seleccionado
 let tipoCuenta = null;
-
-// Detectar el tipo de cuenta elegido
 document.querySelectorAll('input[name="tipo-cuenta"]').forEach((input) => {
   input.addEventListener('change', (e) => {
     tipoCuenta = e.target.value;
   });
 });
 
-// Función para generar un código de referido único
+// Código de referido único
 function generarCodigoReferido() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
-// Guardar tipo de cuenta en localStorage para usarlo después
+// Guardar tipo de cuenta para uso posterior
 function guardarTipoCuentaEnLocal() {
   localStorage.setItem('tipoCuenta', tipoCuenta);
 }
 
-// 🧠 FUNCIONES PRINCIPALES:
+// Datos comunes iniciales (usuario o comerciante)
+function obtenerDatosBase(user, nombre, apellido, telefono, registradoCon) {
+  return {
+    nombre,
+    apellido,
+    email: user.email,
+    telefono,
+    uid: user.uid,
+    registradoCon,
+    referidoPor,
+    codigoReferido: generarCodigoReferido(),
+    creadoEn: new Date().toISOString(),
+    completadoPerfil: false,
+    edad: '',
+    provincia: '',
+    localidad: '',
+    direccion: '',
+    numero: '',
+    departamento: '',
+    formacion: '',
+    trabajo: '',
+    ecivil: '',
+    hijos: '',
+    cantidadHijos: ''
+  };
+}
 
-// Registro normal por formulario
+// Registro por formulario
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -84,44 +107,30 @@ form.addEventListener('submit', async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    if (tipoCuenta === 'usuario') {
-      // Guardar en colección "usuarios"
-      await setDoc(doc(db, 'usuarios', user.uid), {
-        nombre,
-        apellido,
-        email,
-        telefono,
-        uid: user.uid,
-        registradoCon: 'formulario',
-        referidoPor,
-        codigoReferido: generarCodigoReferido(),
-        creadoEn: new Date().toISOString(),
-        completadoPerfil: false
-      });
-    } else if (tipoCuenta === 'comercio') {
-      // Guardar en colección "usuariosComercio"
-      await setDoc(doc(db, 'usuariosComercio', user.uid), {
-        nombre,
-        apellido,
-        email,
-        telefono,
-        uid: user.uid,
-        registradoCon: 'formulario',
-        referidoPor,
-        codigoReferido: generarCodigoReferido(),
-        creadoEn: new Date().toISOString(),
-        completadoPerfil: false
-      });
+    const datosBase = obtenerDatosBase(user, nombre, apellido, telefono, 'formulario');
 
-      // Crear documento vacío inicial en "comercios"
+    if (tipoCuenta === 'usuario') {
+      await setDoc(doc(db, 'usuarios', user.uid), datosBase);
+    } else {
+      await setDoc(doc(db, 'usuariosComercio', user.uid), datosBase);
+
+      // Crear documento vacío para el comercio
       await setDoc(doc(db, 'comercios', user.uid), {
         ownerUid: user.uid,
         nombreComercio: '',
         direccion: '',
+        numero: '',
+        departamento: '',
         provincia: '',
         localidad: '',
         rubro: '',
-        redes: '',
+        enlaceMaps: '',
+        linksExtra: Array(9).fill(''),
+        redes: {
+          web: '',
+          instagram: '',
+          facebook: ''
+        },
         creadoEn: new Date().toISOString(),
         completadoPerfil: false
       });
@@ -135,11 +144,9 @@ form.addEventListener('submit', async (e) => {
 
   } catch (error) {
     console.error(error);
-    if (error.code === 'auth/email-already-in-use') {
-      alert('Este correo ya está en uso.');
-    } else {
-      alert('Error al registrarse. Intenta nuevamente.');
-    }
+    alert(error.code === 'auth/email-already-in-use'
+      ? 'Este correo ya está en uso.'
+      : 'Error al registrarse. Intenta nuevamente.');
   }
 });
 
@@ -159,41 +166,29 @@ googleLoginBtn.addEventListener('click', async () => {
     const apellido = resto.join(' ') || '';
     const telefono = user.phoneNumber || '';
 
+    const datosBase = obtenerDatosBase(user, nombre, apellido, telefono, 'google');
+
     if (tipoCuenta === 'usuario') {
-      await setDoc(doc(db, 'usuarios', user.uid), {
-        nombre,
-        apellido,
-        email: user.email,
-        telefono,
-        uid: user.uid,
-        registradoCon: 'google',
-        referidoPor,
-        codigoReferido: generarCodigoReferido(),
-        creadoEn: new Date().toISOString(),
-        completadoPerfil: false
-      });
-    } else if (tipoCuenta === 'comercio') {
-      await setDoc(doc(db, 'usuariosComercio', user.uid), {
-        nombre,
-        apellido,
-        email: user.email,
-        telefono,
-        uid: user.uid,
-        registradoCon: 'google',
-        referidoPor,
-        codigoReferido: generarCodigoReferido(),
-        creadoEn: new Date().toISOString(),
-        completadoPerfil: false
-      });
+      await setDoc(doc(db, 'usuarios', user.uid), datosBase);
+    } else {
+      await setDoc(doc(db, 'usuariosComercio', user.uid), datosBase);
 
       await setDoc(doc(db, 'comercios', user.uid), {
         ownerUid: user.uid,
         nombreComercio: '',
         direccion: '',
+        numero: '',
+        departamento: '',
         provincia: '',
         localidad: '',
         rubro: '',
-        redes: '',
+        enlaceMaps: '',
+        linksExtra: Array(9).fill(''),
+        redes: {
+          web: '',
+          instagram: '',
+          facebook: ''
+        },
         creadoEn: new Date().toISOString(),
         completadoPerfil: false
       });
