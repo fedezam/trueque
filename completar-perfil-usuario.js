@@ -12,17 +12,19 @@ const cantidadHijosDiv = document.getElementById('cantidad-hijos');
 const cantidadHijosInput = document.getElementById('cantidad-hijos-input');
 const hijosSelect = document.getElementById('hijos');
 
-// Mostrar campo de cantidad de hijos si elige "sí"
-hijosSelect.addEventListener('change', (e) => {
-  cantidadHijosDiv.style.display = e.target.value === 'si' ? 'block' : 'none';
-});
-
-// Cargar provincias y localidades desde JSON
 let localidadesGlobal = [];
 
-fetch('localidades.json')
-  .then(res => res.json())
-  .then(data => {
+hijosSelect.addEventListener('change', (e) => {
+  const tieneHijos = e.target.value === 'si';
+  cantidadHijosDiv.style.display = tieneHijos ? 'block' : 'none';
+  cantidadHijosInput.required = tieneHijos;
+});
+
+// Carga dinámica de provincias y localidades
+async function cargarProvincias() {
+  try {
+    const res = await fetch('localidades.json');
+    const data = await res.json();
     localidadesGlobal = data.localidades_censales;
 
     const provincias = [...new Set(localidadesGlobal.map(loc => loc.provincia.nombre))];
@@ -47,18 +49,20 @@ fetch('localidades.json')
           localidadesSelect.appendChild(option);
         });
     });
-  })
-  .catch(err => {
-    console.error('Error al cargar provincias y localidades:', err);
+  } catch (err) {
+    console.error('Error al cargar provincias:', err);
     alert('Error al cargar provincias. Intentalo más tarde.');
-  });
+  }
+}
 
-// Obtener y completar datos si existen
+// Inicio de sesión y carga de datos existentes
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert('Debés iniciar sesión primero.');
     return window.location.href = 'login.html';
   }
+
+  await cargarProvincias();
 
   const tipoCuenta = localStorage.getItem('tipoCuenta');
   const coleccion = tipoCuenta === 'comercio' ? 'usuariosComercio' : 'usuarios';
@@ -69,6 +73,7 @@ onAuthStateChanged(auth, async (user) => {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
+
       document.getElementById('nombre').value = data.nombre || '';
       document.getElementById('apellido').value = data.apellido || '';
       document.getElementById('telefono').value = data.telefono || '';
@@ -80,17 +85,19 @@ onAuthStateChanged(auth, async (user) => {
       document.getElementById('direccion').value = data.direccion || '';
       document.getElementById('departamento').value = data.departamento || '';
 
-      if (data.hijos === 'si' && data.cantidadHijos) {
+      if (data.hijos === 'si') {
         cantidadHijosDiv.style.display = 'block';
-        cantidadHijosInput.value = data.cantidadHijos;
+        cantidadHijosInput.required = true;
+        cantidadHijosInput.value = data.cantidadHijos || '';
       }
 
       if (data.provincia) {
         provinciasSelect.value = data.provincia;
         provinciasSelect.dispatchEvent(new Event('change'));
+
         setTimeout(() => {
           localidadesSelect.value = data.localidad || '';
-        }, 300);
+        }, 300); // Delay para asegurar que se carguen las localidades
       }
     }
   } catch (err) {
@@ -98,9 +105,17 @@ onAuthStateChanged(auth, async (user) => {
     alert('No se pudo cargar tu perfil.');
   }
 
-  // Guardar datos
+  // Guardar datos actualizados
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Validación manual si tiene hijos
+    if (hijosSelect.value === 'si') {
+      const cant = parseInt(cantidadHijosInput.value);
+      if (!cant || cant <= 0) {
+        return alert('Indicá una cantidad válida de hijos.');
+      }
+    }
 
     const perfilActualizado = {
       nombre: document.getElementById('nombre').value.trim(),
@@ -115,7 +130,9 @@ onAuthStateChanged(auth, async (user) => {
       trabajo: document.getElementById('trabajo').value,
       ecivil: document.getElementById('ecivil').value,
       hijos: hijosSelect.value,
-      cantidadHijos: hijosSelect.value === 'si' ? cantidadHijosInput.value.trim() : '',
+      cantidadHijos: hijosSelect.value === 'si'
+        ? parseInt(cantidadHijosInput.value.trim()) || 0
+        : 0,
       completadoPerfil: true,
     };
 
