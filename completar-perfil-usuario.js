@@ -1,6 +1,3 @@
-import { verificarSesion } from './verificar-sesion.js';
-verificarSesion();
-
 import { auth, db } from './firebase-config.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
