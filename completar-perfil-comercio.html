@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Completar Perfil - Comercio</title>
+  <title>Completar Perfil Comercio</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <script type="module" src="completar-perfil-comercio.js" defer></script>
@@ -14,9 +14,9 @@
     <h2>Completar Perfil del Comercio</h2>
 
     <form id="completar-perfil-form">
-      <!-- Datos personales -->
+      <!-- Datos personales del Comerciante -->
       <fieldset>
-        <legend>👤 Datos del Comerciante</legend>
+        <legend>👤 Datos Personales</legend>
 
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" required class="input-form">
@@ -39,14 +39,14 @@
         </select>
       </fieldset>
 
-      <!-- Datos del comercio -->
+      <!-- Datos del Comercio -->
       <fieldset>
         <legend>🏪 Datos del Comercio</legend>
 
         <label for="nombre-comercio">Nombre del Comercio:</label>
         <input type="text" id="nombre-comercio" required class="input-form">
 
-        <label for="direccion-comercio">Dirección:</label>
+        <label for="direccion-comercio">Dirección del Comercio:</label>
         <input type="text" id="direccion-comercio" required class="input-form">
 
         <label for="provincia">Provincia:</label>
@@ -55,27 +55,29 @@
         <label for="localidad">Localidad:</label>
         <select id="localidad" required class="input-form"></select>
 
-        <label for="rubro">Rubro del Comercio:</label>
-        <select id="rubro" required class="input-form">
-          <option value="">Seleccioná un rubro</option>
+        <label for="rubro-principal">Rubro Principal:</label>
+        <select id="rubro-principal" required class="input-form"></select>
+
+        <label for="subrubro">Subcategoría:</label>
+        <select id="subrubro" required class="input-form">
+          <option value="">Seleccioná un subrubro</option>
         </select>
 
-        <label for="web">Sitio web del Comercio (opcional):</label>
-        <input type="url" id="web" placeholder="https://mi-comercio.com" class="input-form">
+        <label for="web">Sitio Web del Comercio (opcional):</label>
+        <input type="url" id="web" placeholder="https://ejemplo.com" class="input-form">
 
-        <label for="instagram">Perfil de Instagram (opcional):</label>
-        <input type="url" id="instagram" placeholder="https://instagram.com/mi_comercio" class="input-form">
+        <label for="instagram">Instagram:</label>
+        <input type="url" id="instagram" placeholder="https://instagram.com/tucomercio" class="input-form">
 
-        <label for="facebook">Perfil de Facebook (opcional):</label>
-        <input type="url" id="facebook" placeholder="https://facebook.com/mi_comercio" class="input-form">
-
-        <small>📢 Al menos uno de estos campos de presencia online es recomendado para redirigir tareas.</small>
+        <label for="facebook">Facebook:</label>
+        <input type="url" id="facebook" placeholder="https://facebook.com/tucomercio" class="input-form">
       </fieldset>
 
-      <button type="submit" class="btn-primary">Guardar perfil</button>
+      <button type="submit" class="btn-primary">Guardar perfil y comercio</button>
     </form>
   </div>
 </body>
 </html>
+
 
 
