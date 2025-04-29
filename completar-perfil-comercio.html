@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completar Perfil - Comercio</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="completar-perfil-comercio.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Completar Perfil del Comercio</h2>
+    <form id="completar-perfil-form">
+      <fieldset>
+        <legend>👤 Datos personales</legend>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required class="input-form" />
+
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" required class="input-form" />
+
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" required class="input-form" />
+
+        <label for="edad">Edad:</label>
+        <select id="edad" required class="input-form">
+          <option value="">Seleccioná tu edad</option>
+          <option value="-18">Menos de 18</option>
+          <option value="18-25">18 a 25</option>
+          <option value="26-35">26 a 35</option>
+          <option value="36-45">36 a 45</option>
+          <option value="46-60">46 a 60</option>
+          <option value="60+">Más de 60</option>
+        </select>
+
+        <label for="formacion-academica">Formación Académica:</label>
+        <select id="formacion-academica" required class="input-form">
+          <option value="">Seleccioná una opción</option>
+          <option value="no tiene estudios">No tiene estudios</option>
+          <option value="primaria">Primaria</option>
+          <option value="secundaria">Secundaria</option>
+          <option value="terciaria">Terciaria</option>
+          <option value="universitaria">Universitaria</option>
+        </select>
+
+        <label for="trabajo">Situación Laboral:</label>
+        <select id="trabajo" required class="input-form">
+          <option value="">Seleccioná una opción</option>
+          <option value="desempleado">Desempleado</option>
+          <option value="empleado">Empleado</option>
+          <option value="independiente">Trabajador independiente</option>
+          <option value="comerciante">Comerciante</option>
+          <option value="jubilado">Jubilado</option>
+          <option value="estudiante">Estudiante</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>🏪 Datos del comercio</legend>
+        <label for="nombre-comercio">Nombre del comercio:</label>
+        <input type="text" id="nombre-comercio" required class="input-form" />
+
+        <label for="direccion-comercio">Dirección del comercio:</label>
+        <input type="text" id="direccion-comercio" required class="input-form" />
+
+        <label for="provincia">Provincia del comercio:</label>
+        <select id="provincia" required class="input-form"></select>
+
+        <label for="localidad">Localidad del comercio:</label>
+        <select id="localidad" required class="input-form"></select>
+
+        <label for="rubro">Rubro del comercio:</label>
+        <select id="rubro" required class="input-form"></select>
+      </fieldset>
+
+      <button type="submit" class="btn-primary">Guardar perfil completo</button>
+    </form>
+  </div>
+</body>
+</html>
