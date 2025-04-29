@@ -5,7 +5,6 @@ import { auth, db } from './firebase-config.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 
-// Elementos del DOM
 const form = document.getElementById('completar-perfil-form');
 const provinciasSelect = document.getElementById('provincia');
 const localidadesSelect = document.getElementById('localidad');
@@ -13,20 +12,19 @@ const cantidadHijosDiv = document.getElementById('cantidad-hijos');
 const cantidadHijosInput = document.getElementById('cantidad-hijos-input');
 const hijosSelect = document.getElementById('hijos');
 
-// Mostrar campo de cantidad de hijos si elige "Sí"
+// Mostrar campo de cantidad de hijos si elige "sí"
 hijosSelect.addEventListener('change', (e) => {
-  const tieneHijos = e.target.value === 'si';
-  cantidadHijosDiv.style.display = tieneHijos ? 'block' : 'none';
-  cantidadHijosInput.required = tieneHijos;
+  cantidadHijosDiv.style.display = e.target.value === 'si' ? 'block' : 'none';
 });
 
-// Cargar provincias y localidades
+// Cargar provincias y localidades desde JSON
 let localidadesGlobal = [];
 
 fetch('localidades.json')
   .then(res => res.json())
   .then(data => {
     localidadesGlobal = data.localidades_censales;
+
     const provincias = [...new Set(localidadesGlobal.map(loc => loc.provincia.nombre))];
     provincias.sort().forEach(prov => {
       const option = document.createElement('option');
@@ -51,16 +49,15 @@ fetch('localidades.json')
     });
   })
   .catch(err => {
-    console.error('Error cargando provincias y localidades:', err);
-    alert('❌ No se pudieron cargar las provincias y localidades.');
+    console.error('Error al cargar provincias y localidades:', err);
+    alert('Error al cargar provincias. Intentalo más tarde.');
   });
 
-// Verificar sesión y cargar datos existentes
+// Obtener y completar datos si existen
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert('Debés iniciar sesión primero.');
-    window.location.href = 'login.html';
-    return;
+    return window.location.href = 'login.html';
   }
 
   const tipoCuenta = localStorage.getItem('tipoCuenta');
@@ -70,43 +67,38 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      document.getElementById('nombre').value = data.nombre || '';
+      document.getElementById('apellido').value = data.apellido || '';
+      document.getElementById('telefono').value = data.telefono || '';
+      document.getElementById('edad').value = data.edad || '';
+      document.getElementById('formacion-academica').value = data.formacion || '';
+      document.getElementById('trabajo').value = data.trabajo || '';
+      document.getElementById('ecivil').value = data.ecivil || '';
+      hijosSelect.value = data.hijos || '';
+      document.getElementById('direccion').value = data.direccion || '';
+      document.getElementById('departamento').value = data.departamento || '';
 
-    if (!docSnap.exists()) {
-      alert('Tu cuenta no está completamente registrada. Volvé a registrarte.');
-      window.location.href = 'registro.html';
-      return;
-    }
+      if (data.hijos === 'si' && data.cantidadHijos) {
+        cantidadHijosDiv.style.display = 'block';
+        cantidadHijosInput.value = data.cantidadHijos;
+      }
 
-    const data = docSnap.data();
-    document.getElementById('nombre').value = data.nombre || '';
-    document.getElementById('apellido').value = data.apellido || '';
-    document.getElementById('telefono').value = data.telefono || '';
-    document.getElementById('edad').value = data.edad || '';
-    document.getElementById('formacion-academica').value = data.formacion || '';
-    document.getElementById('trabajo').value = data.trabajo || '';
-    document.getElementById('ecivil').value = data.ecivil || '';
-    hijosSelect.value = data.hijos || '';
-
-    if (data.hijos === 'si' && data.cantidadHijos) {
-      cantidadHijosDiv.style.display = 'block';
-      cantidadHijosInput.value = data.cantidadHijos;
-      cantidadHijosInput.required = true;
-    }
-
-    if (data.provincia) {
-      provinciasSelect.value = data.provincia;
-      provinciasSelect.dispatchEvent(new Event('change'));
-
-      setTimeout(() => {
-        localidadesSelect.value = data.localidad || '';
-      }, 500);
+      if (data.provincia) {
+        provinciasSelect.value = data.provincia;
+        provinciasSelect.dispatchEvent(new Event('change'));
+        setTimeout(() => {
+          localidadesSelect.value = data.localidad || '';
+        }, 300);
+      }
     }
   } catch (err) {
-    console.error('Error al obtener datos del perfil:', err);
-    alert('❌ Error al cargar tu perfil.');
+    console.error('Error al obtener datos:', err);
+    alert('No se pudo cargar tu perfil.');
   }
 
-  // Guardar perfil actualizado
+  // Guardar datos
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -117,6 +109,8 @@ onAuthStateChanged(auth, async (user) => {
       edad: document.getElementById('edad').value,
       provincia: provinciasSelect.value,
       localidad: localidadesSelect.value,
+      direccion: document.getElementById('direccion').value.trim(),
+      departamento: document.getElementById('departamento').value.trim(),
       formacion: document.getElementById('formacion-academica').value,
       trabajo: document.getElementById('trabajo').value,
       ecivil: document.getElementById('ecivil').value,
@@ -127,11 +121,11 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
       await setDoc(docRef, perfilActualizado, { merge: true });
-      alert('✅ Perfil guardado correctamente.');
+      alert('Perfil guardado correctamente.');
       window.location.href = dashboardDestino;
     } catch (err) {
-      console.error('Error al guardar el perfil:', err);
-      alert('❌ Error al guardar tu perfil. Intentalo nuevamente.');
+      console.error('Error al guardar perfil:', err);
+      alert('Error al guardar tu perfil.');
     }
   });
 });
