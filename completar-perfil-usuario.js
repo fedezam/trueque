@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Mostrar u ocultar el campo de cantidad de hijos
+  // Función para acceder a inputs del formulario por name
+  const getInput = (name) => form.querySelector(`[name="${name}"]`);
+
   const toggleCantidadHijos = (valor) => {
     if (!cantidadHijosDiv || !cantidadHijosInput) return;
     cantidadHijosDiv.style.display = valor === 'si' ? 'block' : 'none';
@@ -42,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localidadesGlobal = data.localidades_censales;
       const provincias = [...new Set(localidadesGlobal.map(loc => loc.provincia.nombre))].sort();
       provincias.forEach(prov => {
-        const option = new Option(prov, prov);
-        provinciasSelect.appendChild(option);
+        provinciasSelect.appendChild(new Option(prov, prov));
       });
 
       provinciasSelect.addEventListener('change', () => {
@@ -81,32 +82,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (docSnap.exists()) {
         const d = docSnap.data();
-        if (!form.nombre) {
-  console.error('❌ Campo "nombre" no existe en el formulario');
-  return alert('El formulario está mal cargado. Revisá el HTML.');
-}
-
         console.log('✅ Datos cargados:', d);
 
-        form.nombre.value = d.nombre || '';
-        form.apellido.value = d.apellido || '';
-        form.telefono.value = d.telefono || '';
-        form.edad.value = d.edad || '';
-        form['formacion-academica'].value = d.formacion || '';
-        form.trabajo.value = d.trabajo || '';
-        form.ecivil.value = d.ecivil || '';
-        form.hijos.value = d.hijos || 'no';
-        toggleCantidadHijos(form.hijos.value);
-        form['cantidad-hijos-input'].value = d.hijos === 'si' ? (d.cantidadHijos || '1') : '0';
-        form.direccion.value = d.direccion || '';
-        form.departamento.value = d.departamento || '';
+        getInput('nombre').value = d.nombre || '';
+        getInput('apellido').value = d.apellido || '';
+        getInput('telefono').value = d.telefono || '';
+        getInput('edad').value = d.edad || '';
+        getInput('formacion-academica').value = d.formacion || '';
+        getInput('trabajo').value = d.trabajo || '';
+        getInput('ecivil').value = d.ecivil || '';
+        getInput('hijos').value = d.hijos || 'no';
+        toggleCantidadHijos(d.hijos);
+        cantidadHijosInput.value = d.hijos === 'si' ? (d.cantidadHijos || '1') : '0';
+        getInput('direccion').value = d.direccion || '';
+        getInput('departamento').value = d.departamento || '';
 
         if (d.provincia) {
           provinciasSelect.value = d.provincia;
           provinciasSelect.dispatchEvent(new Event('change'));
           setTimeout(() => {
             localidadesSelect.value = d.localidad || '';
-          }, 300); // Esperar que se llenen
+          }, 300);
         }
       } else {
         console.warn('⚠️ Usuario sin datos previos');
@@ -126,19 +122,19 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('💾 Guardando perfil...');
 
       const perfilActualizado = {
-        nombre: form.nombre.value.trim(),
-        apellido: form.apellido.value.trim(),
-        telefono: form.telefono.value.trim(),
-        edad: form.edad.value,
+        nombre: getInput('nombre').value.trim(),
+        apellido: getInput('apellido').value.trim(),
+        telefono: getInput('telefono').value.trim(),
+        edad: getInput('edad').value,
         provincia: provinciasSelect.value,
         localidad: localidadesSelect.value,
-        direccion: form.direccion.value.trim(),
-        departamento: form.departamento.value.trim(),
-        formacion: form['formacion-academica'].value,
-        trabajo: form.trabajo.value,
-        ecivil: form.ecivil.value,
-        hijos: form.hijos.value,
-        cantidadHijos: form.hijos.value === 'si' ? form['cantidad-hijos-input'].value.trim() : '0',
+        direccion: getInput('direccion').value.trim(),
+        departamento: getInput('departamento').value.trim(),
+        formacion: getInput('formacion-academica').value,
+        trabajo: getInput('trabajo').value,
+        ecivil: getInput('ecivil').value,
+        hijos: getInput('hijos').value,
+        cantidadHijos: getInput('hijos').value === 'si' ? cantidadHijosInput.value.trim() : '0',
         completadoPerfil: true,
       };
 
@@ -154,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Botón manual de prueba (opcional para debug)
   window.recargarPerfil = async function () {
     alert('Reintentando carga...');
     spinner.style.display = 'block';
@@ -171,3 +166,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 });
+
