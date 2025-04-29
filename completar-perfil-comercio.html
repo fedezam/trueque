@@ -4,20 +4,19 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Completar Perfil Comercio - TruequeCoin</title>
+  <title>Completar Perfil - Comercio</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <script type="module" src="completar-perfil-comercio.js" defer></script>
 </head>
 <body>
   <div class="container">
-    <h2>Completar Perfil del Comerciante</h2>
+    <h2>Completar Perfil del Comercio</h2>
 
     <form id="completar-perfil-form">
-
-      <!-- Datos personales del comerciante -->
+      <!-- Datos personales -->
       <fieldset>
-        <legend>👤 Datos personales</legend>
+        <legend>👤 Datos del Comerciante</legend>
 
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" required class="input-form">
@@ -44,10 +43,10 @@
       <fieldset>
         <legend>🏪 Datos del Comercio</legend>
 
-        <label for="nombre-comercio">Nombre del comercio:</label>
+        <label for="nombre-comercio">Nombre del Comercio:</label>
         <input type="text" id="nombre-comercio" required class="input-form">
 
-        <label for="direccion-comercio">Dirección del comercio:</label>
+        <label for="direccion-comercio">Dirección:</label>
         <input type="text" id="direccion-comercio" required class="input-form">
 
         <label for="provincia">Provincia:</label>
@@ -56,31 +55,27 @@
         <label for="localidad">Localidad:</label>
         <select id="localidad" required class="input-form"></select>
 
-        <label for="rubro">Rubro del comercio:</label>
+        <label for="rubro">Rubro del Comercio:</label>
         <select id="rubro" required class="input-form">
           <option value="">Seleccioná un rubro</option>
         </select>
+
+        <label for="web">Sitio web del Comercio (opcional):</label>
+        <input type="url" id="web" placeholder="https://mi-comercio.com" class="input-form">
+
+        <label for="instagram">Perfil de Instagram (opcional):</label>
+        <input type="url" id="instagram" placeholder="https://instagram.com/mi_comercio" class="input-form">
+
+        <label for="facebook">Perfil de Facebook (opcional):</label>
+        <input type="url" id="facebook" placeholder="https://facebook.com/mi_comercio" class="input-form">
+
+        <small>📢 Al menos uno de estos campos de presencia online es recomendado para redirigir tareas.</small>
       </fieldset>
 
-      <!-- Presencia en redes o web -->
-      <fieldset>
-        <legend>🌐 Presencia online</legend>
-
-        <label for="web-comercio">Sitio web del comercio (opcional):</label>
-        <input type="url" id="web-comercio" placeholder="https://tuweb.com" class="input-form">
-
-        <label for="instagram">Instagram (opcional):</label>
-        <input type="url" id="instagram" placeholder="https://instagram.com/tucomercio" class="input-form">
-
-        <label for="facebook">Facebook (opcional):</label>
-        <input type="url" id="facebook" placeholder="https://facebook.com/tucomercio" class="input-form">
-
-        <p class="nota">* Es obligatorio completar al menos uno: web, Instagram o Facebook.</p>
-      </fieldset>
-
-      <button type="submit" class="btn-primary">Guardar Perfil</button>
+      <button type="submit" class="btn-primary">Guardar perfil</button>
     </form>
   </div>
 </body>
 </html>
+
 
