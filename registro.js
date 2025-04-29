@@ -58,6 +58,7 @@ function obtenerDatosBase(user, nombre, apellido, telefono, registradoCon) {
     email: user.email,
     telefono,
     uid: user.uid,
+    tipoCuenta,
     registradoCon,
     referidoPor,
     codigoReferido: generarCodigoReferido(),
