@@ -1,19 +1,27 @@
+// completar-perfil-comercio.js
 import { verificarSesion } from './verificar-sesion.js';
 verificarSesion();
 
 import { auth, db } from './firebase-config.js';
-import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
+import {
+  doc,
+  setDoc,
+  getDoc
+} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 
-// Elementos del DOM
+// Elementos del formulario
 const form = document.getElementById('completar-perfil-form');
 const provinciasSelect = document.getElementById('provincia');
 const localidadesSelect = document.getElementById('localidad');
 const rubroSelect = document.getElementById('rubro');
+const websiteInput = document.getElementById('web-comercio');
+const instagramInput = document.getElementById('instagram');
+const facebookInput = document.getElementById('facebook');
 
-// Cargar provincias y localidades
 let localidadesGlobal = [];
 
+// Cargar provincias y localidades desde archivo JSON
 fetch('localidades.json')
   .then(res => res.json())
   .then(data => {
@@ -43,10 +51,10 @@ fetch('localidades.json')
   })
   .catch(err => {
     console.error('Error cargando provincias y localidades:', err);
-    alert('❌ No se pudieron cargar las provincias y localidades.');
+    alert('No se pudieron cargar las provincias y localidades.');
   });
 
-// Cargar rubros
+// Cargar rubros desde archivo JSON
 fetch('rubros.json')
   .then(res => res.json())
   .then(data => {
@@ -59,10 +67,10 @@ fetch('rubros.json')
   })
   .catch(err => {
     console.error('Error cargando rubros:', err);
-    alert('❌ No se pudieron cargar los rubros.');
+    alert('No se pudieron cargar los rubros.');
   });
 
-// Verificar sesión y cargar datos existentes
+// Verificar sesión y cargar datos si existen
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert('Debés iniciar sesión primero.');
@@ -70,28 +78,33 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const docRef = doc(db, 'usuariosComercio', user.uid);
-  const dashboardDestino = 'dashboard-comercio.html';
+  const tipoCuenta = localStorage.getItem('tipoCuenta');
+  if (tipoCuenta !== 'comercio') {
+    alert('Esta página es solo para comerciantes.');
+    return window.location.href = 'dashboard-usuario.html';
+  }
+
+  const docRef = doc(db, 'usuariosComercio', user.uid); // CORRECTO: ahora buscamos en usuariosComercio
 
   try {
     const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
+    if (!docSnap.exists()) {
+      console.log('Documento de comerciante no encontrado, completando perfil.');
+      // No existe → completar como nuevo (sin error)
+    } else {
       const data = docSnap.data();
-
-      // Cargar datos personales
       document.getElementById('nombre').value = data.nombre || '';
       document.getElementById('apellido').value = data.apellido || '';
       document.getElementById('telefono').value = data.telefono || '';
       document.getElementById('edad').value = data.edad || '';
 
-      // Cargar datos del comercio
       document.getElementById('nombre-comercio').value = data.nombreComercio || '';
-      document.getElementById('direccion-comercio').value = data.direccion || '';
+      document.getElementById('direccion-comercio').value = data.direccionComercio || '';
+      websiteInput.value = data.webComercio || '';
+      instagramInput.value = data.instagram || '';
+      facebookInput.value = data.facebook || '';
       rubroSelect.value = data.rubro || '';
-      document.getElementById('web').value = data.web || '';
-      document.getElementById('instagram').value = data.instagram || '';
-      document.getElementById('facebook').value = data.facebook || '';
 
       if (data.provincia) {
         provinciasSelect.value = data.provincia;
@@ -103,38 +116,45 @@ onAuthStateChanged(auth, async (user) => {
       }
     }
   } catch (err) {
-    console.error('Error cargando datos del comercio:', err);
-    alert('❌ Error al cargar tu perfil.');
+    console.error('Error al cargar datos del comerciante:', err);
+    alert('Error cargando tu perfil. Por favor, intenta más tarde.');
   }
 
-  // Guardar perfil actualizado
+  // Guardar perfil al enviar formulario
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Validar que al menos uno de los tres campos de redes esté lleno
+    if (!websiteInput.value.trim() && !instagramInput.value.trim() && !facebookInput.value.trim()) {
+      alert('Debés completar al menos uno: tu sitio web, Instagram o Facebook.');
+      return;
+    }
 
     const perfilActualizado = {
       nombre: document.getElementById('nombre').value.trim(),
       apellido: document.getElementById('apellido').value.trim(),
       telefono: document.getElementById('telefono').value.trim(),
-      edad: document.getElementById('edad').value,
+      edad: document.getElementById('edad').value.trim(),
       nombreComercio: document.getElementById('nombre-comercio').value.trim(),
-      direccion: document.getElementById('direccion-comercio').value.trim(),
+      direccionComercio: document.getElementById('direccion-comercio').value.trim(),
       provincia: provinciasSelect.value,
       localidad: localidadesSelect.value,
       rubro: rubroSelect.value,
-      web: document.getElementById('web').value.trim(),
-      instagram: document.getElementById('instagram').value.trim(),
-      facebook: document.getElementById('facebook').value.trim(),
+      webComercio: websiteInput.value.trim(),
+      instagram: instagramInput.value.trim(),
+      facebook: facebookInput.value.trim(),
       completadoPerfil: true
     };
 
     try {
       await setDoc(docRef, perfilActualizado, { merge: true });
-      alert('✅ Perfil del comercio guardado correctamente.');
-      window.location.href = dashboardDestino;
+      alert('✅ Perfil del comerciante actualizado correctamente.');
+      window.location.href = 'dashboard-comercio.html';
     } catch (err) {
-      console.error('Error guardando el perfil del comercio:', err);
-      alert('❌ Error al guardar tu perfil. Intentalo nuevamente.');
+      console.error('Error al guardar perfil:', err);
+      alert('❌ Error al guardar tu perfil. Intenta de nuevo.');
     }
   });
 });
+
 
