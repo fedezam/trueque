@@ -1,128 +1,86 @@
-/* Estilos básicos */
+/* ---------- Reset básico ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ---------- Tipografías y cuerpo ---------- */
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: #f9f9f9;
-  margin: 0;
-  padding: 0;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
+/* ---------- Contenedores generales ---------- */
 .container {
-  max-width: 400px;
+  max-width: 500px;
   margin: 40px auto;
   padding: 20px;
-  background: white;
+  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 0 10px #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-h2 {
+/* ---------- Títulos ---------- */
+h1, h2, legend {
+  color: #0066cc;
   text-align: center;
-  color: #333;
+  margin-bottom: 20px;
 }
 
-/* Formularios */
-form input[type="text"],
-form input[type="email"],
-form input[type="password"],
-form input[type="tel"],
-.input-form {
-  display: block;
+/* ---------- Formularios ---------- */
+form {
   width: 100%;
-  margin: 8px 0;
+}
+
+.input-form, 
+select.input-form, 
+textarea.input-form {
+  width: 100%;
   padding: 10px;
-  border-radius: 4px;
+  margin: 8px 0 20px;
   border: 1px solid #ccc;
-  font-family: 'Montserrat', sans-serif;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.input-form:focus, 
+select.input-form:focus {
   outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 5px rgba(0,102,204,0.3);
 }
 
-.input-form:focus {
-  border-color: #4299e1; /* Azul claro */
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
-}
-
-/* Botones */
-button,
-.btn-primary,
-.btn-google {
-  width: 100%;
-  padding: 10px;
-  margin-top: 12px;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-}
-
+/* ---------- Botones ---------- */
 .btn-primary {
   background-color: #0066cc;
   color: white;
+  font-weight: bold;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s;
 }
 
 .btn-primary:hover {
   background-color: #004c99;
 }
 
-.btn-google {
-  background-color: #dc2626;
-  color: white;
+/* ---------- Textos secundarios ---------- */
+.nota {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: -10px;
+  margin-bottom: 20px;
 }
 
-.btn-google:hover {
-  background-color: #b91c1c;
-}
-
-/* Otros */
-#password-rules {
-  font-size: 0.85em;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-/* Tipo de cuenta */
-.tipo-cuenta {
-  margin-top: 10px;
-}
-
-.tipo-cuenta label {
-  display: inline-block;
-  padding: 10px 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.tipo-cuenta input[type="radio"] {
-  display: none;
-}
-
-.tipo-cuenta input[type="radio"]:checked + span {
-  color: #007bff;
-}
-
-.tipo-cuenta label span {
-  position: relative;
-  padding-left: 25px;
-}
-
-.tipo-cuenta label span::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 20px;
-  height: 20px;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-}
-
-.tipo-cuenta input[type="radio"]:checked + span::before {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-/* Navbar */
+/* ---------- Navbar ---------- */
 nav {
   background-color: #ffffff;
   border-bottom: 1px solid #ddd;
@@ -138,42 +96,28 @@ nav {
   gap: 20px;
   list-style: none;
   padding: 0;
-  margin: 0;
 }
 
-.navbar li {
-  display: inline;
-}
-
-.navbar a,
+.navbar a, 
 .navbar button {
   text-decoration: none;
   color: #333;
   font-weight: bold;
   background: none;
   border: none;
-  cursor: pointer;
   font-size: 1em;
-  padding: 8px 12px;
+  padding: 10px 15px;
+  cursor: pointer;
 }
 
-.navbar a.activo,
-.navbar a:hover,
+.navbar a.activo, 
+.navbar a:hover, 
 .navbar button:hover {
   background-color: #e0e0e0;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
-/* Secciones */
-.bienvenida,
-.instrucciones,
-.tareas {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 20px;
-}
-
-/* Tareas */
+/* ---------- Tarjetas de tareas ---------- */
 .tareas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -182,7 +126,7 @@ nav {
 }
 
 .tarea-card {
-  background-color: #fff;
+  background: #fff;
   border-radius: 8px;
   border: 1px solid #ddd;
   padding: 16px;
@@ -190,23 +134,39 @@ nav {
 }
 
 .tarea-card h3 {
-  margin-top: 0;
   color: #0066cc;
+  margin-bottom: 10px;
 }
 
 .tarea-card p {
-  margin: 8px 0;
-  color: #444;
+  margin: 6px 0;
 }
 
 .tarea-card button {
   background-color: #28a745;
-  color: #fff;
-  font-weight: bold;
-  margin-top: 10px;
+  color: white;
   width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .tarea-card button:hover {
   background-color: #218838;
+}
+
+/* ---------- Responsive Design ---------- */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
