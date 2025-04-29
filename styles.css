@@ -1,88 +1,102 @@
-/* ---------- Reset básico ---------- */
-* {
+/* ====== Configuración base ====== */
+:root {
+  --color-primario: #0066cc;
+  --color-secundario: #004c99;
+  --color-verde: #28a745;
+  --color-verde-hover: #218838;
+  --color-fondo: #f9f9f9;
+  --color-texto: #333;
+  --color-enlace: #007bff;
+  --fuente-principal: 'Montserrat', sans-serif;
+}
+
+body {
+  font-family: var(--fuente-principal);
+  background-color: var(--color-fondo);
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  color: var(--color-texto);
 }
 
-/* ---------- Tipografías y cuerpo ---------- */
-body {
-  font-family: 'Montserrat', sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* ---------- Contenedores generales ---------- */
+/* ====== Contenedor Principal ====== */
 .container {
-  max-width: 500px;
+  max-width: 600px;
   margin: 40px auto;
   padding: 20px;
-  background: #ffffff;
+  background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* ---------- Títulos ---------- */
-h1, h2, legend {
-  color: #0066cc;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* ---------- Formularios ---------- */
-form {
+/* ====== Formularios ====== */
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="tel"],
+form input[type="url"],
+form input[type="number"],
+form select {
+  display: block;
   width: 100%;
-}
-
-.input-form, 
-select.input-form, 
-textarea.input-form {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  margin: 10px 0;
+  padding: 10px 12px;
   font-size: 1em;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
-.input-form:focus, 
-select.input-form:focus {
+input:focus, select:focus {
   outline: none;
-  border-color: #0066cc;
+  border-color: var(--color-primario);
   box-shadow: 0 0 5px rgba(0,102,204,0.3);
 }
 
-/* ---------- Botones ---------- */
-.btn-primary {
-  background-color: #0066cc;
+/* ====== Botones ====== */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: var(--color-primario);
   color: white;
   font-weight: bold;
   border: none;
-  padding: 12px;
-  width: 100%;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 1em;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
-.btn-primary:hover {
-  background-color: #004c99;
+button:hover {
+  background-color: var(--color-secundario);
 }
 
-/* ---------- Textos secundarios ---------- */
-.nota {
-  font-size: 0.9em;
-  color: #777;
-  margin-top: -10px;
+/* ====== Links ====== */
+a {
+  color: var(--color-enlace);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ====== Secciones de formulario ====== */
+fieldset {
+  border: 1px solid #ddd;
+  padding: 15px 20px;
+  border-radius: 8px;
   margin-bottom: 20px;
 }
 
-/* ---------- Navbar ---------- */
+legend {
+  font-weight: bold;
+  color: var(--color-primario);
+}
+
+/* ====== Navbar (general) ====== */
 nav {
-  background-color: #ffffff;
+  background-color: #fff;
   border-bottom: 1px solid #ddd;
   padding: 10px 0;
   position: sticky;
@@ -96,28 +110,33 @@ nav {
   gap: 20px;
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.navbar a, 
+.navbar li {
+  display: inline;
+}
+
+.navbar a,
 .navbar button {
   text-decoration: none;
-  color: #333;
+  color: var(--color-texto);
   font-weight: bold;
   background: none;
   border: none;
-  font-size: 1em;
-  padding: 10px 15px;
   cursor: pointer;
+  font-size: 1em;
+  padding: 8px 12px;
 }
 
-.navbar a.activo, 
-.navbar a:hover, 
+.navbar a.activo,
+.navbar a:hover,
 .navbar button:hover {
   background-color: #e0e0e0;
-  border-radius: 5px;
+  border-radius: 6px;
 }
 
-/* ---------- Tarjetas de tareas ---------- */
+/* ====== Tarjetas de tareas ====== */
 .tareas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -126,7 +145,7 @@ nav {
 }
 
 .tarea-card {
-  background: #fff;
+  background-color: #fff;
   border-radius: 8px;
   border: 1px solid #ddd;
   padding: 16px;
@@ -134,39 +153,40 @@ nav {
 }
 
 .tarea-card h3 {
-  color: #0066cc;
-  margin-bottom: 10px;
+  margin-top: 0;
+  color: var(--color-primario);
 }
 
 .tarea-card p {
-  margin: 6px 0;
+  margin: 8px 0;
+  color: #444;
 }
 
 .tarea-card button {
-  background-color: #28a745;
-  color: white;
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  margin-top: 10px;
-  cursor: pointer;
+  background-color: var(--color-verde);
+  color: #fff;
   font-weight: bold;
+  margin-top: 10px;
+  width: 100%;
 }
 
 .tarea-card button:hover {
-  background-color: #218838;
+  background-color: var(--color-verde-hover);
 }
 
-/* ---------- Responsive Design ---------- */
+/* ====== Utilidades extra ====== */
+small {
+  font-size: 0.85em;
+  color: #666;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Responsive adicional */
 @media (max-width: 600px) {
   .container {
-    margin: 20px;
+    margin: 20px 10px;
     padding: 15px;
   }
-
-  .navbar {
-    flex-direction: column;
-    gap: 10px;
-  }
 }
+
