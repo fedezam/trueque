@@ -2,70 +2,74 @@
 // Este archivo se encarga de verificar que el usuario esté autenticado, registrado y con perfil completo.
 
 import { auth, db } from './firebase-config.js';
-import {
-  onAuthStateChanged
-} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
-import {
-  doc,
-  getDoc
-} from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js';
 
 /**
- * Verifica que haya sesión activa, cuenta correcta y perfil completo.
- * 
- * Si todo está OK, resuelve el usuario, el tipo de cuenta y los datos del Firestore.
- * Si algo falla, redirige automáticamente a la página correspondiente.
- * 
- * @returns {Promise<{user: Object, tipoCuenta: string, data: Object}>}
+ * Configuración de rutas
+ */
+const config = {
+  rutasPublicas: [
+    '/trueque/completar-perfil-usuario.html',
+    '/trueque/completar-perfil-comercio.html'
+  ],
+  rutasRedireccion: {
+    usuario: 'completar-perfil-usuario.html',
+    comercio: 'completar-perfil-comercio.html'
+  }
+};
+
+/**
+ * Verifica si la ruta actual está permitida
+ * @param {string} ruta - window.location.pathname
+ * @param {boolean} completadoPerfil
+ * @returns {boolean}
+ */
+function tieneAcceso(ruta, completadoPerfil) {
+  return config.rutasPublicas.includes(ruta) || completadoPerfil;
+}
+
+/**
+ * Redirige al usuario a la página de completar perfil correspondiente
+ * @param {'usuario'|'comercio'} tipoCuenta
+ */
+function redirigirPerfilIncompleto(tipoCuenta) {
+  console.warn('Perfil incompleto. Redirigiendo a completar perfil.');
+  window.location.href = config.rutasRedireccion[tipoCuenta];
+}
+
+/**
+ * Función principal que comprueba la sesión y, si existe,
+ * carga el documento de Firestore y verifica completadoPerfil.
  */
 export function verificarSesion() {
-  return new Promise((resolve, reject) => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user || !user.uid) {
-        console.warn('No hay sesión activa.');
-        window.location.href = "inicio.html";
-        return reject('No autenticado');
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      // No hay usuario autenticado: enviamos al login
+      return window.location.href = 'login.html';
+    }
+
+    // Obtenemos el tipo de cuenta del localStorage
+    const tipoCuenta = localStorage.getItem('tipoCuenta') || 'usuario';
+    const coleccion = tipoCuenta === 'comercio' ? 'usuariosComercio' : 'usuarios';
+    const docRef = doc(db, coleccion, user.uid);
+
+    try {
+      const snap = await getDoc(docRef);
+      const data = snap.exists() ? snap.data() : {};
+
+      // Si el perfil NO está marcado como completado y la ruta no es pública,
+      // forzamos redirección
+      if (!tieneAcceso(window.location.pathname, data.completadoPerfil)) {
+        return redirigirPerfilIncompleto(tipoCuenta);
       }
 
-      const tipoCuenta = localStorage.getItem("tipoCuenta");
-      if (!tipoCuenta || (tipoCuenta !== "usuario" && tipoCuenta !== "comercio")) {
-        console.warn('Tipo de cuenta inválido o no especificado.');
-        window.location.href = "inicio.html";
-        return reject('Tipo de cuenta inválido');
-      }
-
-      const coleccion = tipoCuenta === "usuario" ? "usuarios" : "usuariosComercio";
-      const docRef = doc(db, coleccion, user.uid);
-
-      try {
-        const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
-          console.warn('El documento del usuario no existe.');
-          window.location.href = "inicio.html";
-          return reject('Usuario no encontrado');
-        }
-
-        const data = docSnap.data();
-
-        if (!data.completadoPerfil) {
-          console.warn('Perfil incompleto. Redirigiendo a completar perfil.');
-          const paginaPerfil = tipoCuenta === "usuario"
-            ? "completar-perfil-usuario.html"
-            : "completar-perfil-comercio.html";
-          window.location.href = paginaPerfil;
-          return reject('Perfil incompleto');
-        }
-
-        // Todo está bien
-        resolve({ user, tipoCuenta, data });
-
-      } catch (err) {
-        console.error('Error verificando sesión:', err);
-        window.location.href = "inicio.html";
-        reject('Error en verificación');
-      }
-    });
+      // Si llegamos aquí, el usuario puede continuar
+      console.log('✅ Sesión verificada y perfil OK o en página de completar.');
+    } catch (err) {
+      console.error('Error verificando perfil:', err);
+      alert('Ocurrió un error al verificar tu sesión. Intenta recargando la página.');
+    }
   });
 }
 
