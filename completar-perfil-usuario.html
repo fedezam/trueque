@@ -17,51 +17,76 @@
 
     <form id="completar-perfil-form">
       <fieldset>
-        <legend>Datos personales</legend>
+        <legend>👤 Datos personales</legend>
 
         <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" name="nombre" required />
+        <input type="text" id="nombre" required />
 
         <label for="apellido">Apellido</label>
-        <input type="text" id="apellido" name="apellido" required />
+        <input type="text" id="apellido" required />
+
+        <label for="email">Email</label>
+        <input type="email" id="email" readonly />
 
         <label for="telefono">Teléfono</label>
-        <input type="tel" id="telefono" name="telefono" required />
+        <input type="tel" id="telefono" required />
+
+        <label for="fecha-nacimiento">Fecha de nacimiento</label>
+        <input type="date" id="fecha-nacimiento" required />
 
         <label for="edad">Edad</label>
-        <input type="number" id="edad" name="edad" min="0" required />
+        <input type="number" id="edad" min="0" required />
+      </fieldset>
+
+      <fieldset>
+        <legend>📍 Dirección</legend>
 
         <label for="provincia">Provincia</label>
-        <select id="provincia" name="provincia" required>
+        <select id="provincia" required>
           <option value="">Seleccioná una provincia</option>
         </select>
 
         <label for="localidad">Localidad</label>
-        <select id="localidad" name="localidad" required>
+        <select id="localidad" required>
           <option value="">Seleccioná una localidad</option>
         </select>
 
-        <label for="direccion">Dirección</label>
-        <input type="text" id="direccion" name="direccion" required />
+        <label for="direccion">Calle</label>
+        <input type="text" id="direccion" required />
 
         <label for="numero">Número</label>
-        <input type="text" id="numero" name="numero" />
+        <input type="text" id="numero" required />
 
         <label for="departamento">Departamento / Piso (opcional)</label>
-        <input type="text" id="departamento" name="departamento" />
+        <input type="text" id="departamento" />
       </fieldset>
 
       <fieldset>
-        <legend>Situación</legend>
+        <legend>📚 Situación actual</legend>
 
         <label for="formacion-academica">Formación académica</label>
-        <input type="text" id="formacion-academica" name="formacion-academica" />
+        <select id="formacion-academica" required>
+          <option value="">Seleccioná una opción</option>
+          <option value="sin estudios">Sin estudios</option>
+          <option value="primaria">Primaria</option>
+          <option value="secundaria">Secundaria</option>
+          <option value="terciaria">Terciaria</option>
+          <option value="universitaria">Universitaria</option>
+        </select>
 
-        <label for="trabajo">Trabajo actual</label>
-        <input type="text" id="trabajo" name="trabajo" />
+        <label for="trabajo">Situación laboral</label>
+        <select id="trabajo" required>
+          <option value="">Seleccioná una opción</option>
+          <option value="desempleado">Desempleado</option>
+          <option value="empleado">Empleado</option>
+          <option value="independiente">Independiente</option>
+          <option value="comerciante">Comerciante</option>
+          <option value="jubilado">Jubilado</option>
+          <option value="estudiante">Estudiante</option>
+        </select>
 
         <label for="ecivil">Estado civil</label>
-        <select id="ecivil" name="ecivil">
+        <select id="ecivil">
           <option value="">Seleccioná una opción</option>
           <option value="soltero">Soltero/a</option>
           <option value="casado">Casado/a</option>
@@ -70,7 +95,7 @@
         </select>
 
         <label for="hijos">¿Tenés hijos?</label>
-        <select id="hijos" name="hijos">
+        <select id="hijos">
           <option value="">Seleccioná una opción</option>
           <option value="no">No</option>
           <option value="si">Sí</option>
@@ -78,7 +103,7 @@
 
         <div id="cantidad-hijos" style="display: none;">
           <label for="cantidad-hijos-input">¿Cuántos hijos?</label>
-          <input type="number" id="cantidad-hijos-input" name="cantidad-hijos-input" min="1" />
+          <input type="number" id="cantidad-hijos-input" min="1" />
         </div>
       </fieldset>
 
@@ -87,4 +112,5 @@
   </div>
 </body>
 </html>
+
 
