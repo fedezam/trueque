@@ -1,81 +1,148 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Completar Perfil - Comercio</title>
+  <title>Completar Perfil Comercio</title>
   <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet" />
   <script type="module" src="completar-perfil-comercio.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Completar Perfil del Comercio</h2>
+  <div id="spinner" class="spinner" style="display: none;">Cargando...</div>
+
+  <div class="container" id="perfil-container" style="display: none;">
+    <h1>Completar perfil de comercio</h1>
+
     <form id="completar-perfil-form">
+      <!-- 🔹 Datos personales -->
       <fieldset>
-        <legend>👤 Datos personales</legend>
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" required class="input-form" />
+        <legend>Datos personales</legend>
 
-        <label for="apellido">Apellido:</label>
-        <input type="text" id="apellido" required class="input-form" />
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" required />
 
-        <label for="telefono">Teléfono:</label>
-        <input type="tel" id="telefono" required class="input-form" />
+        <label for="apellido">Apellido</label>
+        <input type="text" id="apellido" name="apellido" required />
 
-        <label for="edad">Edad:</label>
-        <select id="edad" required class="input-form">
-          <option value="">Seleccioná tu edad</option>
-          <option value="-18">Menos de 18</option>
-          <option value="18-25">18 a 25</option>
-          <option value="26-35">26 a 35</option>
-          <option value="36-45">36 a 45</option>
-          <option value="46-60">46 a 60</option>
-          <option value="60+">Más de 60</option>
+        <label for="email" disabled>Email</label>
+        <input type="email" id="email" name="email" disabled />
+
+        <label for="telefono">Teléfono</label>
+        <input type="tel" id="telefono" name="telefono" required />
+
+        <label for="fecha-nacimiento">Fecha de nacimiento</label>
+        <input type="date" id="fecha-nacimiento" name="fecha-nacimiento" required />
+
+        <label for="edad">Edad</label>
+        <input type="number" id="edad" name="edad" readonly />
+
+        <label for="provincia">Provincia</label>
+        <select id="provincia" name="provincia" required>
+          <option value="">Seleccioná una provincia</option>
         </select>
 
-        <label for="formacion-academica">Formación Académica:</label>
-        <select id="formacion-academica" required class="input-form">
+        <label for="localidad">Localidad</label>
+        <select id="localidad" name="localidad" required>
+          <option value="">Seleccioná una localidad</option>
+        </select>
+
+        <label for="direccion">Calle</label>
+        <input type="text" id="direccion" name="direccion" required />
+
+        <label for="numero">Número</label>
+        <input type="text" id="numero" name="numero" required />
+
+        <label for="departamento">Departamento (opcional)</label>
+        <input type="text" id="departamento" name="departamento" />
+      </fieldset>
+
+      <!-- 🔹 Datos socioeconómicos -->
+      <fieldset>
+        <legend>Situación</legend>
+
+        <label for="formacion-academica">Formación académica</label>
+        <select id="formacion-academica" name="formacion-academica" required>
           <option value="">Seleccioná una opción</option>
-          <option value="no tiene estudios">No tiene estudios</option>
+          <option value="sin_estudios">Sin estudios</option>
           <option value="primaria">Primaria</option>
           <option value="secundaria">Secundaria</option>
           <option value="terciaria">Terciaria</option>
           <option value="universitaria">Universitaria</option>
         </select>
 
-        <label for="trabajo">Situación Laboral:</label>
-        <select id="trabajo" required class="input-form">
+        <label for="trabajo">Situación laboral</label>
+        <select id="trabajo" name="trabajo" required>
           <option value="">Seleccioná una opción</option>
           <option value="desempleado">Desempleado</option>
           <option value="empleado">Empleado</option>
-          <option value="independiente">Trabajador independiente</option>
+          <option value="independiente">Independiente</option>
           <option value="comerciante">Comerciante</option>
           <option value="jubilado">Jubilado</option>
           <option value="estudiante">Estudiante</option>
         </select>
+
+        <label for="ecivil">Estado civil</label>
+        <select id="ecivil" name="ecivil">
+          <option value="">Seleccioná una opción</option>
+          <option value="soltero">Soltero/a</option>
+          <option value="casado">Casado/a</option>
+          <option value="pareja">En pareja</option>
+          <option value="divorciado">Divorciado/a</option>
+        </select>
+
+        <label for="hijos">¿Tenés hijos?</label>
+        <select id="hijos" name="hijos">
+          <option value="">Seleccioná una opción</option>
+          <option value="no">No</option>
+          <option value="si">Sí</option>
+        </select>
+
+        <div id="cantidad-hijos" style="display: none;">
+          <label for="cantidad-hijos-input">¿Cuántos hijos?</label>
+          <input type="number" id="cantidad-hijos-input" name="cantidad-hijos-input" min="1" />
+        </div>
       </fieldset>
 
+      <!-- 🔹 Datos comerciales -->
       <fieldset>
-        <legend>🏪 Datos del comercio</legend>
-        <label for="nombre-comercio">Nombre del comercio:</label>
-        <input type="text" id="nombre-comercio" required class="input-form" />
+        <legend>Datos del comercio</legend>
 
-        <label for="direccion-comercio">Dirección del comercio:</label>
-        <input type="text" id="direccion-comercio" required class="input-form" />
+        <label for="nombreComercio">Nombre del comercio</label>
+        <input type="text" id="nombreComercio" name="nombreComercio" required />
 
-        <label for="provincia">Provincia del comercio:</label>
-        <select id="provincia" required class="input-form"></select>
+        <label for="rubro">Rubro</label>
+        <select id="rubro" name="rubro" required>
+          <option value="">Seleccioná un rubro</option>
+        </select>
 
-        <label for="localidad">Localidad del comercio:</label>
-        <select id="localidad" required class="input-form"></select>
+        <label for="telefonoComercio">Teléfono del comercio</label>
+        <input type="tel" id="telefonoComercio" name="telefonoComercio" required />
 
-        <label for="rubro">Rubro del comercio:</label>
-        <select id="rubro" required class="input-form"></select>
+        <label for="direccionComercio">Dirección del comercio</label>
+        <input type="text" id="direccionComercio" name="direccionComercio" required />
+
+        <label for="provinciaComercio">Provincia del comercio</label>
+        <select id="provinciaComercio" name="provinciaComercio" required></select>
+
+        <label for="localidadComercio">Localidad del comercio</label>
+        <select id="localidadComercio" name="localidadComercio" required></select>
+
+        <label for="web">Sitio web del comercio</label>
+        <input type="url" id="web" name="web" />
+
+        <label for="instagram">Instagram</label>
+        <input type="url" id="instagram" name="instagram" />
+
+        <label for="facebook">Facebook</label>
+        <input type="url" id="facebook" name="facebook" />
+
+        <label for="enlaceMaps">Google Maps (enlace del local)</label>
+        <input type="url" id="enlaceMaps" name="enlaceMaps" />
       </fieldset>
 
-      <button type="submit" class="btn-primary">Guardar perfil completo</button>
+      <button type="submit">Guardar perfil completo</button>
     </form>
   </div>
 </body>
